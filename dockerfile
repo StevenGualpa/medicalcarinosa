@@ -18,4 +18,4 @@ RUN go build -o main main.go
 EXPOSE 3000
 
 # Ejecutar la aplicación
-CMD["./main"]
+CMD ["./main"]
