@@ -1,67 +1,64 @@
-// main.go
 package main
 
 import (
-	"GolandProyectos/handlers"
 	"GolandProyectos/models"
-	"GolandProyectos/repository"
-	"GolandProyectos/routers"
-	"log"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
 )
+
+func setupRoutes(app *fiber.App, db *gorm.DB) {
+	// Grupo de rutas para API
+	api := app.Group("/api")
+
+	// Rutas relacionadas con usuarios
+	users := api.Group("/users")
+	users.Post("/", func(c *fiber.Ctx) error {
+		var user models.User
+		if err := c.BodyParser(&user); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Cannot parse body",
+			})
+		}
+
+		if result := db.Create(&user); result.Error != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Cannot create user",
+			})
+		}
+
+		return c.Status(fiber.StatusCreated).JSON(user)
+	})
+
+	// Aquí puedes agregar más rutas a tu grupo 'users' o crear nuevos grupos.
+}
 
 func main() {
 	app := fiber.New()
 	config := viper.New()
 
-	// Configuración de Viper y carga de variables de entorno
-	config.AutomaticEnv()
+	// Configuración y conexión a la base de datos omitidas para brevedad...
 
-	config.SetDefault("APP_PORT", "3000")
-	config.SetDefault("APP_ENV", "development")
-
-	// Lectura del archivo de configuración
-	config.SetConfigName("config")
-	config.SetConfigType("env")
-	config.AddConfigPath(".")
-	config.AddConfigPath("/etc/secrets/")
-
-	// Load the config
-	err := config.ReadInConfig()
-	if err != nil {
-		log.Println(err)
-	}
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-
-	dsn := "host=ep-lingering-snowflake-a5j9m53w.us-east-2.aws.neon.tech user=stevengualpa password=VamLyM2btnd4 dbname=carinosabd port=5432 sslmode=verify-full"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
 
-	db.AutoMigrate(&models.User{})
-	db.Create(&models.User{
-		FirstName: "Steven",
-		LastName:  "Gualpa",
-	})
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		log.Fatalf("Failed to auto migrate: %v", err)
+	}
 
-	// Instancia del repositorio y los manejadores
-	userRepo := repository.NewUserRepository(db)
-	userHandler := handlers.NewUserHandler(userRepo)
-
-	// Configuración de rutas
-	routers.SetupUserRoutes(app, userHandler)
+	// Configurar rutas
+	setupRoutes(app, db)
 
 	// Ruta de bienvenida
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 
-	// Iniciar el servidor Fiber
-	log.Fatal(app.Listen(":" + config.GetString("APP_PORT")))
-
-	app.Listen(":" + config.GetString("APP_PORT"))
+	// Iniciar el servidor
+	port := config.GetString("APP_PORT")
+	log.Fatal(app.Listen(":" + port))
 }
