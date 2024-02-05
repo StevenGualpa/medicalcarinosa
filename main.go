@@ -30,22 +30,23 @@ func main() {
 	config.AddConfigPath(".")
 	config.AddConfigPath("/etc/secrets/")
 
+	// Load the config
 	err := config.ReadInConfig()
 	if err != nil {
-		log.Println("Error reading config file, using default settings:", err)
+		log.Println(err)
 	}
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World!")
+	})
 
-	// Conexión a la base de datos PostgreSQL
-	dsn := config.GetString("DATABASE_URL") // Asume que DATABASE_URL es una variable de entorno
+	dsn := "host=ep-lingering-snowflake-a5j9m53w.us-east-2.aws.neon.tech user=stevengualpa password=VamLyM2btnd4 dbname=carinosabd port=5432 sslmode=verify-full"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
-	}
 
-	// Automigración para el modelo User
-	if err := db.AutoMigrate(&models.User{}); err != nil {
-		log.Fatalf("Error automigrating: %v", err)
-	}
+	db.AutoMigrate(&models.User{})
+	db.Create(&models.User{
+		FirstName: "Steven",
+		LastName:  "Gualpa",
+	})
 
 	// Instancia del repositorio y los manejadores
 	userRepo := repository.NewUserRepository(db)
@@ -61,4 +62,6 @@ func main() {
 
 	// Iniciar el servidor Fiber
 	log.Fatal(app.Listen(":" + config.GetString("APP_PORT")))
+
+	app.Listen(":" + config.GetString("APP_PORT"))
 }
