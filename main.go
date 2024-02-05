@@ -1,48 +1,64 @@
+// main.go
 package main
 
 import (
+	"GolandProyectos/handlers"
 	"GolandProyectos/models"
+	"GolandProyectos/repository"
+	"GolandProyectos/routers"
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 func main() {
 	app := fiber.New()
 	config := viper.New()
 
-	// Read environment variables
+	// Configuración de Viper y carga de variables de entorno
 	config.AutomaticEnv()
 
 	config.SetDefault("APP_PORT", "3000")
 	config.SetDefault("APP_ENV", "development")
 
-	// Read the config file
+	// Lectura del archivo de configuración
 	config.SetConfigName("config")
 	config.SetConfigType("env")
 	config.AddConfigPath(".")
 	config.AddConfigPath("/etc/secrets/")
-	// config.AddConfigPath("/workspaces/api-ortografia")
 
-	// Load the config
 	err := config.ReadInConfig()
 	if err != nil {
-		log.Println(err)
+		log.Println("Error reading config file, using default settings:", err)
 	}
+
+	// Conexión a la base de datos PostgreSQL
+	dsn := config.GetString("DATABASE_URL") // Asume que DATABASE_URL es una variable de entorno
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Error connecting to database: %v", err)
+	}
+
+	// Automigración para el modelo User
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		log.Fatalf("Error automigrating: %v", err)
+	}
+
+	// Instancia del repositorio y los manejadores
+	userRepo := repository.NewUserRepository(db)
+	userHandler := handlers.NewUserHandler(userRepo)
+
+	// Configuración de rutas
+	routers.SetupUserRoutes(app, userHandler)
+
+	// Ruta de bienvenida
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 
-	dsn := "host=ep-lingering-snowflake-a5j9m53w.us-east-2.aws.neon.tech user=stevengualpa password=VamLyM2btnd4 dbname=carinosabd port=5432 sslmode=verify-full"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-
-	db.AutoMigrate(&models.User{})
-	db.Create(&models.User{
-		FirstName: "Steven",
-		LastName:  "Gualpa",
-	})
-
-	app.Listen(":" + config.GetString("APP_PORT"))
+	// Iniciar el servidor Fiber
+	log.Fatal(app.Listen(":" + config.GetString("APP_PORT")))
 }
