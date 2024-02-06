@@ -4,7 +4,7 @@ import (
 	"GolandProyectos/handlers"
 	"GolandProyectos/models"
 	"GolandProyectos/repository"
-	"GolandProyectos/routers" // Asegúrate de ajustar esta importación según tu estructura de paquetes
+	"GolandProyectos/routers"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
@@ -13,29 +13,31 @@ import (
 )
 
 func main() {
-	app := fiber.New()
-	config := viper.New()
+	app := fiber.New()    // Inicia la aplicación Fiber
+	config := viper.New() // Inicia Viper para la configuración
 
-	// Configuración de Viper...
+	// Configura Viper para leer variables de entorno
 	config.AutomaticEnv()
 	config.SetDefault("APP_PORT", "3000")
 	config.SetDefault("APP_ENV", "development")
-	config.SetConfigName("config")
-	config.SetConfigType("env")
-	config.AddConfigPath(".")
+	config.SetConfigName("config") // Nombre del archivo de configuración sin la extensión
+	config.SetConfigType("env")    // Extensión del archivo de configuración
+	config.AddConfigPath(".")      // Ubicación del archivo de configuración
 	config.AddConfigPath("/etc/secrets/")
+
+	// Intenta leer el archivo de configuración
 	if err := config.ReadInConfig(); err != nil {
-		log.Println("Error al leer el archivo de configuración:", err)
+		log.Printf("Advertencia: No se pudo leer el archivo de configuración. %v", err)
 	}
 
-	// Conexión a la base de datos...
-	dsn := config.GetString("DATABASE_URL") // Asume que tienes esta variable configurada
+	// Establece la cadena DSN para la conexión a la base de datos
+	dsn := "host=ep-lingering-snowflake-a5j9m53w.us-east-2.aws.neon.tech user=stevengualpa password=VamLyM2btnd4 dbname=carinosabd port=5432 sslmode=verify-full"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Error al conectar con la base de datos: %v", err)
 	}
 
-	// Automigración para el modelo User...
+	// Automigración para el modelo User
 	if err := db.AutoMigrate(&models.User{}); err != nil {
 		log.Fatalf("Error en la automigración: %v", err)
 	}
@@ -47,8 +49,15 @@ func main() {
 	// Configurar rutas de usuarios
 	routers.SetupUserRoutes(app, userHandler)
 
-	// Iniciar el servidor...
+	// Define una ruta de bienvenida
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("¡Hola, Mundo!")
+	})
+
+	// Inicia el servidor en el puerto configurado
 	port := config.GetString("APP_PORT")
 	log.Printf("Servidor iniciado en el puerto %s", port)
-	log.Fatal(app.Listen(":" + port))
+	if err := app.Listen(":" + port); err != nil {
+		log.Fatalf("Error al iniciar el servidor: %v", err)
+	}
 }
