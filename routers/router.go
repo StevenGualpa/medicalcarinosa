@@ -8,9 +8,9 @@ import (
 
 // SetupUserRoutes configura las rutas relacionadas con los usuarios.
 func SetupUserRoutes(app *fiber.App, userHandler handlers.UserHandler) {
-	app.Get("/Users/GetAll", userHandler.GetUsers)
+	app.Get("/api/getAll", userHandler.GetUsers)
 	app.Get("/api/users/:id", userHandler.GetUser)
-	app.Post("/Users/Insert", userHandler.CreateUser)
+	app.Post("/api/insert", userHandler.CreateUser)
 	app.Put("/api/users/:id", userHandler.UpdateUser)
 	app.Delete("/api/users/:id", userHandler.DeleteUser)
 }
