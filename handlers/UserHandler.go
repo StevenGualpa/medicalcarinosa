@@ -15,6 +15,8 @@ type UserHandler interface {
 	CreateUser(c *fiber.Ctx) error
 	UpdateUser(c *fiber.Ctx) error
 	DeleteUser(c *fiber.Ctx) error
+	Login(c *fiber.Ctx) error // Método de inicio de sesión añadido
+
 }
 
 // userHandler es la implementación concreta de UserHandler.
@@ -24,6 +26,27 @@ type userHandler struct {
 
 func NewUserHandler(repo repository.UserRepository) UserHandler {
 	return &userHandler{repo}
+}
+
+// Login maneja la solicitud POST para el inicio de sesión de un usuario.
+func (h *userHandler) Login(c *fiber.Ctx) error {
+	var loginInfo struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := c.BodyParser(&loginInfo); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Bad Request"})
+	}
+
+	user, message, err := h.repo.Login(loginInfo.Email, loginInfo.Password)
+	if err != nil {
+		// Puedes decidir devolver el mismo mensaje de error para ambos casos
+		// (usuario no encontrado y contraseña incorrecta) para evitar dar pistas a posibles atacantes
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": message})
+	}
+
+	// Devuelve los datos del usuario y un mensaje de éxito
+	return c.JSON(fiber.Map{"message": message, "user": user})
 }
 
 // GetUsers maneja la solicitud GET para recuperar todos los usuarios y su cantidad.
