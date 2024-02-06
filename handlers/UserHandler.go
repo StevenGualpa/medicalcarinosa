@@ -22,18 +22,17 @@ type userHandler struct {
 	repo repository.UserRepository
 }
 
-// NewUserHandler crea una nueva instancia de userHandler.
 func NewUserHandler(repo repository.UserRepository) UserHandler {
 	return &userHandler{repo}
 }
 
-// GetUsers maneja la solicitud GET para recuperar todos los usuarios.
+// GetUsers maneja la solicitud GET para recuperar todos los usuarios y su cantidad.
 func (h *userHandler) GetUsers(c *fiber.Ctx) error {
-	users, err := h.repo.GetAllUsers()
+	users, count, err := h.repo.GetAllUsers()
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
 	}
-	return c.Status(200).JSON(users)
+	return c.JSON(fiber.Map{"users": users, "count": count})
 }
 
 // GetUser maneja la solicitud GET para recuperar un usuario por su ID.
