@@ -6,6 +6,7 @@ import (
 	"GolandProyectos/repository"
 	"GolandProyectos/routers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -13,7 +14,11 @@ import (
 )
 
 func main() {
-	app := fiber.New()    // Inicia la aplicación Fiber
+	app := fiber.New() // Inicia la aplicación Fiber
+
+	// Configura el middleware CORS para permitir solicitudes de cualquier origen
+	app.Use(cors.New())
+
 	config := viper.New() // Inicia Viper para la configuración
 
 	// Configura Viper para leer variables de entorno
