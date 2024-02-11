@@ -68,6 +68,9 @@ func (h *userHandler) CreateUser(c *fiber.Ctx) error {
 		roleData = models.Paciente{
 			NumeroEmergencia: input.NumeroEmergencia,
 		}
+	case "admin":
+		// No se requiere acción adicional para el rol 'admin'
+		break // No hay datos adicionales que asignar
 	default:
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid role"})
 	}

@@ -42,8 +42,7 @@ func (r *userRepository) CreateUser(user models.User) (models.User, error) {
 }
 
 // Metodo para crear si es usuario adicioal si es cuidado o paciente
-// Suponiendo que esta función es parte de tu UserRepository
-// UserRepository.go
+
 func (r *userRepository) CreateUserWithRole(user models.User, roleData interface{}) (models.User, error) {
 	// Verificar si el correo electrónico ya está registrado
 	var count int64
@@ -67,7 +66,7 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 	case "cuidador":
 		cuidador, ok := roleData.(models.Cuidador)
 		if !ok {
-			tx.Rollback() // Revierter si los datos del rol no son válidos
+			tx.Rollback() // Revertir si los datos del rol no son válidos
 			return models.User{}, errors.New("invalid role data for cuidador")
 		}
 		cuidador.UserID = user.ID
@@ -78,7 +77,7 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 	case "paciente":
 		paciente, ok := roleData.(models.Paciente)
 		if !ok {
-			tx.Rollback() // Revierter si los datos del rol no son válidos
+			tx.Rollback() // Revertir si los datos del rol no son válidos
 			return models.User{}, errors.New("invalid role data for paciente")
 		}
 		paciente.UserID = user.ID
@@ -86,6 +85,9 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 			tx.Rollback()
 			return models.User{}, err
 		}
+	case "admin":
+		// No se requiere acción adicional para el rol 'admin'
+		// La lógica específica del rol 'admin' puede ser implementada aquí si es necesario
 	}
 
 	// Si todo fue exitoso, hace commit de la transacción
@@ -96,6 +98,7 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 
 	return user, nil // Devuelve el usuario creado con éxito
 }
+
 func (r *userRepository) UpdateUser(user models.User) (models.User, error) {
 	result := r.db.Save(&user)
 	return user, result.Error
