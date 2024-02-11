@@ -34,14 +34,19 @@ func (h *userHandler) GetUsers(c *fiber.Ctx) error {
 }
 
 func (h *userHandler) GetUsersRoles(c *fiber.Ctx) error {
-	role := c.Query("role") // Recupera el parámetro de consulta "role" si existe
+	var filter struct {
+		Role string `json:"role"`
+	}
 
-	users, count, err := h.repo.GetAllUsersWithRoleFilter(role)
+	if err := c.BodyParser(&filter); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot parse JSON"})
+	}
+
+	users, count, err := h.repo.GetAllUsersWithRoleFilter(filter.Role)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
 	}
 
-	// La respuesta ahora incluirá los datos relevantes según el rol
 	return c.JSON(fiber.Map{"users": users, "count": count})
 }
 
