@@ -44,7 +44,7 @@ func (h *userHandler) GetUsersRoles(c *fiber.Ctx) error {
 
 	users, count, err := h.repo.GetAllUsersWithRoleFilter(filter.Role)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error roles"})
 	}
 
 	return c.JSON(fiber.Map{"users": users, "count": count})
