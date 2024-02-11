@@ -12,6 +12,7 @@ type UserRepository interface {
 	UpdateUser(user models.User) (models.User, error)
 	DeleteUser(id uint) error
 	GetAllUsers() ([]models.User, int, error)
+	GetAllUsersWithRoleFilter(role string) ([]models.User, int, error) // Nuevo método agregado
 	Login(email, password string) (models.User, string, error)
 	CreateUserWithRole(user models.User, roleData interface{}) (models.User, error)
 }
@@ -28,6 +29,23 @@ func (r *userRepository) GetAllUsers() ([]models.User, int, error) {
 	var users []models.User
 	result := r.db.Find(&users)
 	return users, int(result.RowsAffected), result.Error
+}
+
+func (r *userRepository) GetAllUsersWithRoleFilter(role string) ([]models.User, int, error) {
+	var users []models.User
+	var result *gorm.DB
+
+	if role == "" {
+		result = r.db.Preload("Cuidador").Preload("Paciente").Find(&users)
+	} else {
+		result = r.db.Where("roles = ?", role).Preload("Cuidador").Preload("Paciente").Find(&users)
+	}
+
+	if result.Error != nil {
+		return nil, 0, result.Error
+	}
+
+	return users, int(result.RowsAffected), nil
 }
 
 func (r *userRepository) GetUserByID(id uint) (models.User, error) {

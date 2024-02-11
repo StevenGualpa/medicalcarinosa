@@ -9,6 +9,7 @@ import (
 
 type UserHandler interface {
 	GetUsers(c *fiber.Ctx) error
+	GetUsersRoles(c *fiber.Ctx) error
 	GetUser(c *fiber.Ctx) error
 	CreateUser(c *fiber.Ctx) error
 	UpdateUser(c *fiber.Ctx) error
@@ -29,6 +30,18 @@ func (h *userHandler) GetUsers(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
 	}
+	return c.JSON(fiber.Map{"users": users, "count": count})
+}
+
+func (h *userHandler) GetUsersRoles(c *fiber.Ctx) error {
+	role := c.Query("role") // Recupera el parámetro de consulta "role" si existe
+
+	users, count, err := h.repo.GetAllUsersWithRoleFilter(role)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+	}
+
+	// La respuesta ahora incluirá los datos relevantes según el rol
 	return c.JSON(fiber.Map{"users": users, "count": count})
 }
 
