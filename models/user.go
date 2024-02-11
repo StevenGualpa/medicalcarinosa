@@ -14,6 +14,18 @@ type User struct {
 	Roles       string `json:"roles"` // Nuevo campo para roles
 }
 
+type Cuidador struct {
+	gorm.Model
+	UserID   uint
+	Relacion string
+}
+
+type Paciente struct {
+	gorm.Model
+	UserID           uint
+	NumeroEmergencia string
+}
+
 func (User) TableName() string {
 	return "users"
 }

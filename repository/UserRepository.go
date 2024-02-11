@@ -43,29 +43,45 @@ func (r *userRepository) CreateUser(user models.User) (models.User, error) {
 
 // Metodo para crear si es usuario adicioal si es cuidado o paciente
 // Suponiendo que esta función es parte de tu UserRepository
+// UserRepository.go
 func (r *userRepository) CreateUserWithRole(user models.User, roleData interface{}) (models.User, error) {
-	// Crear usuario
-	if err := r.db.Create(&user).Error; err != nil {
+	// Iniciar una transacción
+	tx := r.db.Begin()
+
+	// Intentar crear el usuario
+	if err := tx.Create(&user).Error; err != nil {
+		tx.Rollback() // Deshacer la transacción si falla la creación del usuario
 		return models.User{}, err
 	}
 
-	// Lógica para manejar roles específicos
+	// Manejar la creación de roles específicos
 	switch user.Roles {
 	case "cuidador":
 		cuidador, ok := roleData.(models.Cuidador)
 		if !ok {
+			tx.Rollback() // Deshacer la transacción si los datos del rol son inválidos
 			return models.User{}, errors.New("invalid role data for cuidador")
 		}
 		cuidador.UserID = user.ID
-		r.db.Create(&cuidador)
+		if err := tx.Create(&cuidador).Error; err != nil {
+			tx.Rollback()
+			return models.User{}, err
+		}
 	case "paciente":
 		paciente, ok := roleData.(models.Paciente)
 		if !ok {
+			tx.Rollback()
 			return models.User{}, errors.New("invalid role data for paciente")
 		}
 		paciente.UserID = user.ID
-		r.db.Create(&paciente)
+		if err := tx.Create(&paciente).Error; err != nil {
+			tx.Rollback()
+			return models.User{}, err
+		}
 	}
+
+	// Si todo salió bien, hacer commit de la transacción
+	tx.Commit()
 	return user, nil
 }
 
