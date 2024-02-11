@@ -11,6 +11,7 @@ type User struct {
 	BirthDate   string `json:"birthdate"` // Tipo cambiado a string
 	Gender      string `json:"gender"`
 	PhoneNumber string `json:"phone"`
+	Roles       string `json:"roles"` // Nuevo campo para roles
 }
 
 func (User) TableName() string {
