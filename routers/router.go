@@ -10,7 +10,7 @@ import (
 func SetupUserRoutes(app *fiber.App, userHandler handlers.UserHandler) {
 	app.Get("/api/getAll", userHandler.GetUsers)
 	app.Get("/api/users/:id", userHandler.GetUser)
-	app.Post("/api/insert", userHandler.CreateUser)
+	app.Post("/user/insertadmin", userHandler.CreateUser)
 	app.Post("/user/insertcuidador", userHandler.CreateUser)
 	app.Post("/user/insertpaciente", userHandler.CreateUser)
 	app.Put("/api/update/:id", userHandler.UpdateUser)
