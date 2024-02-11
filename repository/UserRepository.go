@@ -45,21 +45,29 @@ func (r *userRepository) CreateUser(user models.User) (models.User, error) {
 // Suponiendo que esta función es parte de tu UserRepository
 // UserRepository.go
 func (r *userRepository) CreateUserWithRole(user models.User, roleData interface{}) (models.User, error) {
-	// Iniciar una transacción
+	// Verificar si el correo electrónico ya está registrado
+	var count int64
+	r.db.Model(&models.User{}).Where("email = ?", user.Email).Count(&count)
+	if count > 0 {
+		// El correo electrónico ya está en uso
+		return models.User{}, errors.New("El email ya esta en uso")
+	}
+
+	// Inicia una transacción
 	tx := r.db.Begin()
 
-	// Intentar crear el usuario
+	// Intenta crear el usuario
 	if err := tx.Create(&user).Error; err != nil {
-		tx.Rollback() // Deshacer la transacción si falla la creación del usuario
+		tx.Rollback() // En caso de error, revierte la transacción
 		return models.User{}, err
 	}
 
-	// Manejar la creación de roles específicos
+	// Lógica para manejar roles específicos
 	switch user.Roles {
 	case "cuidador":
 		cuidador, ok := roleData.(models.Cuidador)
 		if !ok {
-			tx.Rollback() // Deshacer la transacción si los datos del rol son inválidos
+			tx.Rollback() // Revierter si los datos del rol no son válidos
 			return models.User{}, errors.New("invalid role data for cuidador")
 		}
 		cuidador.UserID = user.ID
@@ -70,7 +78,7 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 	case "paciente":
 		paciente, ok := roleData.(models.Paciente)
 		if !ok {
-			tx.Rollback()
+			tx.Rollback() // Revierter si los datos del rol no son válidos
 			return models.User{}, errors.New("invalid role data for paciente")
 		}
 		paciente.UserID = user.ID
@@ -80,11 +88,14 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 		}
 	}
 
-	// Si todo salió bien, hacer commit de la transacción
-	tx.Commit()
-	return user, nil
-}
+	// Si todo fue exitoso, hace commit de la transacción
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return models.User{}, err
+	}
 
+	return user, nil // Devuelve el usuario creado con éxito
+}
 func (r *userRepository) UpdateUser(user models.User) (models.User, error) {
 	result := r.db.Save(&user)
 	return user, result.Error
