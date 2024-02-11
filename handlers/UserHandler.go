@@ -56,9 +56,19 @@ func (h *userHandler) CreateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Bad Request"})
 	}
 
-	// Aquí deberías construir el objeto roleData basado en el rol y pasarlo a CreateUserWithRole
 	var roleData interface{}
-	// Construye roleData basado en input.Roles
+	switch input.Roles {
+	case "cuidador":
+		roleData = models.Cuidador{
+			Relacion: input.Relacion,
+			// Asegúrate de que los campos adicionales necesarios estén aquí
+		}
+	case "paciente":
+		roleData = models.Paciente{
+			NumeroEmergencia: input.NumeroEmergencia,
+			// Asegúrate de que los campos adicionales necesarios estén aquí
+		}
+	}
 
 	createdUser, err := h.repo.CreateUserWithRole(input.User, roleData)
 	if err != nil {
