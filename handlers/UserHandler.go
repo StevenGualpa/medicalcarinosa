@@ -44,15 +44,27 @@ func (h *userHandler) GetUser(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
+// En tu handler CreateUser
 func (h *userHandler) CreateUser(c *fiber.Ctx) error {
-	var user models.User
-	if err := c.BodyParser(&user); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Bad Request"})
+	var input struct {
+		models.User
+		Relacion         string `json:"relacion"`
+		NumeroEmergencia string `json:"numeroEmergencia"`
 	}
-	createdUser, err := h.repo.CreateUser(user)
+
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Bad Request"})
+	}
+
+	// Aquí deberías construir el objeto roleData basado en el rol y pasarlo a CreateUserWithRole
+	var roleData interface{}
+	// Construye roleData basado en input.Roles
+
+	createdUser, err := h.repo.CreateUserWithRole(input.User, roleData)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
 	}
+
 	return c.Status(201).JSON(createdUser)
 }
 

@@ -13,6 +13,7 @@ type UserRepository interface {
 	DeleteUser(id uint) error
 	GetAllUsers() ([]models.User, int, error)
 	Login(email, password string) (models.User, string, error)
+	CreateUserWithRole(user models.User, roleData interface{}) (models.User, error)
 }
 
 type userRepository struct {
@@ -38,6 +39,34 @@ func (r *userRepository) GetUserByID(id uint) (models.User, error) {
 func (r *userRepository) CreateUser(user models.User) (models.User, error) {
 	result := r.db.Create(&user)
 	return user, result.Error
+}
+
+// Metodo para crear si es usuario adicioal si es cuidado o paciente
+// Suponiendo que esta función es parte de tu UserRepository
+func (r *userRepository) CreateUserWithRole(user models.User, roleData interface{}) (models.User, error) {
+	// Crear usuario
+	if err := r.db.Create(&user).Error; err != nil {
+		return models.User{}, err
+	}
+
+	// Lógica para manejar roles específicos
+	switch user.Roles {
+	case "cuidador":
+		cuidador, ok := roleData.(models.Cuidador)
+		if !ok {
+			return models.User{}, errors.New("invalid role data for cuidador")
+		}
+		cuidador.UserID = user.ID
+		r.db.Create(&cuidador)
+	case "paciente":
+		paciente, ok := roleData.(models.Paciente)
+		if !ok {
+			return models.User{}, errors.New("invalid role data for paciente")
+		}
+		paciente.UserID = user.ID
+		r.db.Create(&paciente)
+	}
+	return user, nil
 }
 
 func (r *userRepository) UpdateUser(user models.User) (models.User, error) {
