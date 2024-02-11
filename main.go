@@ -43,7 +43,9 @@ func main() {
 	}
 
 	// Automigración para el modelo User
-	if err := db.AutoMigrate(&models.User{}); err != nil {
+	if err := db.AutoMigrate(&models.User{},
+		&models.Cuidador{},
+		&models.Paciente{}); err != nil {
 		log.Fatalf("Error en la automigración: %v", err)
 	}
 
