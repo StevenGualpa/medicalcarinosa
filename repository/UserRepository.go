@@ -33,23 +33,19 @@ func (r *userRepository) GetAllUsers() ([]models.User, int, error) {
 
 func (r *userRepository) GetAllUsersWithRoleFilter(role string) ([]models.User, int, error) {
 	var users []models.User
-	query := r.db
+	query := r.db.Model(&models.User{})
 
-	// Filtra por rol si se proporciona uno
 	if role != "" {
 		query = query.Where("roles = ?", role)
 	}
 
-	// Intenta cargar relaciones basadas en el rol específico, si es necesario
-	// Nota: Esto es solo un ejemplo y puede no funcionar directamente sin la configuración correcta de GORM
-	// Deberías ajustar esto basado en tus necesidades específicas y la configuración de GORM
+	// Preload de relaciones basado en el rol
 	if role == "cuidador" {
 		query = query.Preload("Cuidador")
 	} else if role == "paciente" {
 		query = query.Preload("Paciente")
 	}
 
-	// Realiza la consulta
 	result := query.Find(&users)
 	if result.Error != nil {
 		return nil, 0, result.Error
