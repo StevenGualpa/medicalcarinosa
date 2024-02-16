@@ -52,6 +52,16 @@ func (h *userHandler) GetUsersRoles(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error roles"})
 	}
 
+	// Limpia la información redundante antes de enviar la respuesta
+	for i := range users {
+		if users[i].Paciente != nil && users[i].Paciente.User.ID != 0 {
+			users[i].Paciente.User = models.User{}
+		}
+		if users[i].Cuidador != nil && users[i].Cuidador.User.ID != 0 {
+			users[i].Cuidador.User = models.User{}
+		}
+	}
+
 	return c.JSON(fiber.Map{"users": users, "count": count})
 }
 
