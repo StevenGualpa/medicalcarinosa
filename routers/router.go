@@ -17,4 +17,7 @@ func SetupUserRoutes(app *fiber.App, userHandler handlers.UserHandler) {
 	app.Put("/api/update/:id", userHandler.UpdateUser)
 	app.Delete("/api/delete/:id", userHandler.DeleteUser)
 	app.Post("/api/login", userHandler.Login)
+
+	// Aquí se agrega la nueva ruta para obtener dispositivos de Arduino
+	app.Get("/api/arduino/devices", handlers.NewArduinoHandler().GetArduinoDevices)
 }

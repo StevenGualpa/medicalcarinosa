@@ -3,7 +3,12 @@ package handlers
 import (
 	"GolandProyectos/models"
 	"GolandProyectos/repository"
+	"context"
+	"github.com/arduino/iot-client-go"
 	"github.com/gofiber/fiber/v2"
+	cc "golang.org/x/oauth2/clientcredentials"
+	"log"
+	"net/url"
 	"strconv"
 )
 
@@ -148,4 +153,58 @@ func (h *userHandler) Login(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"message": message, "user": user})
+}
+
+// Definir las credenciales del cliente de Arduino IoT como constantes o variables
+const (
+	clientID     = "k9asQ6bG8GoiJyMcdmiPSaAWCvntvIVe"
+	clientSecret = "BZcIzieDfhb8mKF3auezYLuFi6cRVsUhFCiEzAMDJEvA2jaDzGM38YfEo95BT3X1"
+)
+
+// ArduinoHandler struct para implementar el manejador
+type ArduinoHandler struct{}
+
+// NewArduinoHandler crea una nueva instancia de ArduinoHandler
+func NewArduinoHandler() *ArduinoHandler {
+	return &ArduinoHandler{}
+}
+
+// GetArduinoDevices maneja la solicitud GET para obtener dispositivos de Arduino IoT
+func (h *ArduinoHandler) GetArduinoDevices(c *fiber.Ctx) error {
+	// Configurar OAuth2
+	additionalValues := url.Values{}
+	additionalValues.Add("audience", "https://api2.arduino.cc/iot")
+	config := cc.Config{
+		ClientID:       clientID,
+		ClientSecret:   clientSecret,
+		TokenURL:       "https://api2.arduino.cc/iot/v1/clients/token",
+		EndpointParams: additionalValues,
+	}
+
+	// Obtener el token de acceso
+	tok, err := config.Token(context.Background())
+	if err != nil {
+		log.Printf("Error retrieving access token, %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to retrieve access token"})
+	}
+
+	// Crear contexto con el token de acceso
+	ctx := context.WithValue(context.Background(), iot.ContextAccessToken, tok.AccessToken)
+
+	// Crear instancia del cliente de la API de Arduino IoT
+	client := iot.NewAPIClient(iot.NewConfiguration())
+
+	// Obtener la lista de dispositivos
+	devices, _, err := client.DevicesV2Api.DevicesV2List(ctx, nil)
+	if err != nil {
+		log.Printf("Error getting devices, %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get devices"})
+	}
+
+	// Devolver la lista de dispositivos como respuesta
+	if len(devices) == 0 {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "No device found"})
+	} else {
+		return c.Status(fiber.StatusOK).JSON(devices)
+	}
 }
