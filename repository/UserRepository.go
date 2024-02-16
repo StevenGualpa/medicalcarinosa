@@ -40,9 +40,10 @@ func (r *userRepository) GetAllUsersWithRoleFilter(role string) ([]models.User, 
 	}
 
 	// Preload de relaciones basado en el rol
-	if role == "cuidador" {
+	switch role {
+	case "cuidador":
 		query = query.Preload("Cuidador")
-	} else if role == "paciente" {
+	case "paciente":
 		query = query.Preload("Paciente")
 	}
 

@@ -1,10 +1,8 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
+import "gorm.io/gorm"
 
-// User representa la tabla de usuarios con información básica.
+// User representa un usuario general con información básica.
 type User struct {
 	gorm.Model
 	FirstName   string `json:"firstname"`
@@ -14,21 +12,24 @@ type User struct {
 	BirthDate   string `json:"birthdate"`
 	Gender      string `json:"gender"`
 	PhoneNumber string `json:"phone"`
-	Roles       string `json:"roles"` // Este campo determina si el usuario es un "cuidador", "paciente" o cualquier otro rol que se necesite.
+	Roles       string `json:"roles"` // Define el rol del usuario ("cuidador", "paciente", "admin", etc.).
+	// Relaciones
+	Cuidador *Cuidador `gorm:"foreignKey:UserID"`
+	Paciente *Paciente `gorm:"foreignKey:UserID"`
 }
 
-// Cuidador representa la información específica de los cuidadores.
+// Cuidador contiene información específica para usuarios con el rol de cuidador.
 type Cuidador struct {
 	gorm.Model
-	UserID   uint   `gorm:"uniqueIndex"` // Relación uno a uno asegurando que cada cuidador esté vinculado a un usuario único
+	UserID   uint   `gorm:"uniqueIndex"` // Clave foránea que apunta a User.
 	Relacion string `json:"relacion"`
-	User     User   `gorm:"foreignKey:UserID"` // Referencia a User para establecer la relación
+	User     User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
-// Paciente representa la información específica de los pacientes.
+// Paciente contiene información específica para usuarios con el rol de paciente.
 type Paciente struct {
 	gorm.Model
-	UserID           uint   `gorm:"uniqueIndex"` // Relación uno a uno asegurando que cada paciente esté vinculado a un usuario único
+	UserID           uint   `gorm:"uniqueIndex"` // Clave foránea que apunta a User.
 	NumeroEmergencia string `json:"numeroEmergencia"`
-	User             User   `gorm:"foreignKey:UserID"` // Referencia a User para establecer la relación
+	User             User   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
