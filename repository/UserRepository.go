@@ -33,14 +33,24 @@ func (r *userRepository) GetAllUsers() ([]models.User, int, error) {
 
 func (r *userRepository) GetAllUsersWithRoleFilter(role string) ([]models.User, int, error) {
 	var users []models.User
-	var result *gorm.DB
+	query := r.db
 
-	if role == "" {
-		result = r.db.Preload("Cuidador").Preload("Paciente").Find(&users)
-	} else {
-		result = r.db.Where("roles = ?", role).Preload("Cuidador").Preload("Paciente").Find(&users)
+	// Filtra por rol si se proporciona uno
+	if role != "" {
+		query = query.Where("roles = ?", role)
 	}
 
+	// Intenta cargar relaciones basadas en el rol específico, si es necesario
+	// Nota: Esto es solo un ejemplo y puede no funcionar directamente sin la configuración correcta de GORM
+	// Deberías ajustar esto basado en tus necesidades específicas y la configuración de GORM
+	if role == "cuidador" {
+		query = query.Preload("Cuidador")
+	} else if role == "paciente" {
+		query = query.Preload("Paciente")
+	}
+
+	// Realiza la consulta
+	result := query.Find(&users)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
@@ -62,59 +72,61 @@ func (r *userRepository) CreateUser(user models.User) (models.User, error) {
 // Metodo para crear si es usuario adicioal si es cuidado o paciente
 
 func (r *userRepository) CreateUserWithRole(user models.User, roleData interface{}) (models.User, error) {
-	// Verificar si el correo electrónico ya está registrado
-	var count int64
-	r.db.Model(&models.User{}).Where("email = ?", user.Email).Count(&count)
-	if count > 0 {
-		// El correo electrónico ya está en uso
-		return models.User{}, errors.New("El email ya esta en uso")
-	}
-
 	// Inicia una transacción
 	tx := r.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Verificar si el correo electrónico ya está registrado
+	var count int64
+	tx.Model(&models.User{}).Where("email = ?", user.Email).Count(&count)
+	if count > 0 {
+		tx.Rollback()
+		return models.User{}, errors.New("el email ya está en uso")
+	}
 
 	// Intenta crear el usuario
 	if err := tx.Create(&user).Error; err != nil {
-		tx.Rollback() // En caso de error, revierte la transacción
+		tx.Rollback()
 		return models.User{}, err
 	}
 
 	// Lógica para manejar roles específicos
 	switch user.Roles {
 	case "cuidador":
-		cuidador, ok := roleData.(models.Cuidador)
-		if !ok {
-			tx.Rollback() // Revertir si los datos del rol no son válidos
-			return models.User{}, errors.New("invalid role data for cuidador")
+		cuidador, ok := roleData.(*models.Cuidador) // Asegúrate de pasar un puntero al tipo correcto
+		if !ok || cuidador == nil {
+			tx.Rollback()
+			return models.User{}, errors.New("datos de rol de cuidador inválidos")
 		}
 		cuidador.UserID = user.ID
-		if err := tx.Create(&cuidador).Error; err != nil {
+		if err := tx.Create(cuidador).Error; err != nil {
 			tx.Rollback()
 			return models.User{}, err
 		}
 	case "paciente":
-		paciente, ok := roleData.(models.Paciente)
-		if !ok {
-			tx.Rollback() // Revertir si los datos del rol no son válidos
-			return models.User{}, errors.New("invalid role data for paciente")
+		paciente, ok := roleData.(*models.Paciente) // Asegúrate de pasar un puntero al tipo correcto
+		if !ok || paciente == nil {
+			tx.Rollback()
+			return models.User{}, errors.New("datos de rol de paciente inválidos")
 		}
 		paciente.UserID = user.ID
-		if err := tx.Create(&paciente).Error; err != nil {
+		if err := tx.Create(paciente).Error; err != nil {
 			tx.Rollback()
 			return models.User{}, err
 		}
-	case "admin":
-		// No se requiere acción adicional para el rol 'admin'
-		// La lógica específica del rol 'admin' puede ser implementada aquí si es necesario
 	}
 
-	// Si todo fue exitoso, hace commit de la transacción
+	// Si todo fue exitoso, finaliza la transacción
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
 		return models.User{}, err
 	}
 
-	return user, nil // Devuelve el usuario creado con éxito
+	return user, nil
 }
 
 func (r *userRepository) UpdateUser(user models.User) (models.User, error) {
