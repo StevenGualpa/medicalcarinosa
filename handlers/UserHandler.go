@@ -82,37 +82,28 @@ func (h *userHandler) GetUser(c *fiber.Ctx) error {
 func (h *userHandler) CreateUser(c *fiber.Ctx) error {
 	var input struct {
 		models.User
-		Relacion         string `json:"relacion"`
-		NumeroEmergencia string `json:"numeroEmergencia"`
+		Relacion         string `json:"relacion,omitempty"`
+		NumeroEmergencia string `json:"numeroEmergencia,omitempty"`
 	}
 
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Bad Request"})
 	}
 
-	// Construir roleData basado en el rol
 	var roleData interface{}
 	switch input.Roles {
 	case "cuidador":
-		roleData = models.Cuidador{
+		roleData = &models.Cuidador{
 			Relacion: input.Relacion,
 		}
 	case "paciente":
-		roleData = models.Paciente{
+		roleData = &models.Paciente{
 			NumeroEmergencia: input.NumeroEmergencia,
 		}
-	case "admin":
-		// No se requiere acción adicional para el rol 'admin'
-		break // No hay datos adicionales que asignar
-	default:
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid role"})
 	}
 
-	// Crear usuario con el rol correspondiente
 	createdUser, err := h.repo.CreateUserWithRole(input.User, roleData)
 	if err != nil {
-		// El error ya no será siempre "Internal Server Error"
-		// Puede ser más específico dependiendo de la validación en CreateUserWithRole
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
