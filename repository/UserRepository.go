@@ -95,24 +95,24 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 	// Lógica para manejar roles específicos
 	switch user.Roles {
 	case "cuidador":
-		cuidador, ok := roleData.(*models.Cuidador) // Asegúrate de pasar un puntero al tipo correcto
+		cuidador, ok := roleData.(*models.Cuidador)
 		if !ok || cuidador == nil {
 			tx.Rollback()
 			return models.User{}, errors.New("datos de rol de cuidador inválidos")
 		}
 		cuidador.UserID = user.ID
-		if err := tx.Create(cuidador).Error; err != nil {
+		if err := tx.Create(&cuidador).Error; err != nil {
 			tx.Rollback()
 			return models.User{}, err
 		}
 	case "paciente":
-		paciente, ok := roleData.(*models.Paciente) // Asegúrate de pasar un puntero al tipo correcto
+		paciente, ok := roleData.(*models.Paciente)
 		if !ok || paciente == nil {
 			tx.Rollback()
 			return models.User{}, errors.New("datos de rol de paciente inválidos")
 		}
 		paciente.UserID = user.ID
-		if err := tx.Create(paciente).Error; err != nil {
+		if err := tx.Create(&paciente).Error; err != nil {
 			tx.Rollback()
 			return models.User{}, err
 		}

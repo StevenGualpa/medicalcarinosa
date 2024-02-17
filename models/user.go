@@ -5,15 +5,16 @@ import "gorm.io/gorm"
 // User representa un usuario general con información básica.
 type User struct {
 	gorm.Model
-	FirstName   string `json:"firstname"`
-	LastName    string `json:"lastname"`
-	Email       string `json:"email" gorm:"unique"`
-	Password    string `json:"password"`
-	BirthDate   string `json:"birthdate"`
-	Gender      string `json:"gender"`
-	PhoneNumber string `json:"phone"`
-	Roles       string `json:"roles"` // Define el rol del usuario ("cuidador", "paciente", "admin", etc.).
-
+	FirstName   string    `json:"firstname"`
+	LastName    string    `json:"lastname"`
+	Email       string    `json:"email" gorm:"unique"`
+	Password    string    `json:"password"`
+	BirthDate   string    `json:"birthdate"`
+	Gender      string    `json:"gender"`
+	PhoneNumber string    `json:"phone"`
+	Roles       string    `json:"roles"` // Define el rol del usuario ("cuidador", "paciente", "admin", etc.).
+	Cuidador    *Cuidador `gorm:"foreignKey:UserID"`
+	Paciente    *Paciente `gorm:"foreignKey:UserID"`
 }
 
 // Cuidador contiene información específica para usuarios con el rol de cuidador.
