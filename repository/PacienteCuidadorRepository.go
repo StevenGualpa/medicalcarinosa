@@ -71,9 +71,11 @@ func (r *pacienteCuidadorRepository) Delete(id uint) error {
 }
 
 // GetAll devuelve todas las relaciones PacienteCuidador de la base de datos.
+// GetAll devuelve todas las relaciones PacienteCuidador con los datos de Paciente y Cuidador.
 func (r *pacienteCuidadorRepository) GetAll() ([]models.PacienteCuidador, error) {
 	var pcs []models.PacienteCuidador
-	result := r.db.Find(&pcs)
+	// Preload Paciente y Cuidador, y también Preload User dentro de Paciente y Cuidador.
+	result := r.db.Preload("Paciente.User").Preload("Cuidador.User").Find(&pcs)
 	if result.Error != nil {
 		return nil, result.Error
 	}
