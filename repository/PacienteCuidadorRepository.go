@@ -29,7 +29,7 @@ func NewPacienteCuidadorRepository(db *gorm.DB) PacienteCuidadorRepository {
 func (r *pacienteCuidadorRepository) Create(pc models.PacienteCuidador) (models.PacienteCuidador, error) {
 	// Verifica si existe el Paciente
 	var pacienteExistente models.Paciente
-	if err := r.db.First(&pacienteExistente, pc.PacienteID).Error; err != nil {
+	if err := r.db.First(&pacienteExistente, "id = ?", pc.PacienteID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.PacienteCuidador{}, fmt.Errorf("el paciente con ID %d no existe", pc.PacienteID)
 		}
@@ -39,7 +39,7 @@ func (r *pacienteCuidadorRepository) Create(pc models.PacienteCuidador) (models.
 
 	// Verifica si existe el Cuidador
 	var cuidadorExistente models.Cuidador
-	if err := r.db.First(&cuidadorExistente, pc.CuidadorID).Error; err != nil {
+	if err := r.db.First(&cuidadorExistente, "id = ?", pc.CuidadorID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return models.PacienteCuidador{}, fmt.Errorf("el cuidador con ID %d no existe", pc.CuidadorID)
 		}
