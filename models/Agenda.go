@@ -10,7 +10,7 @@ type Agenda struct {
 	gorm.Model
 	PacienteCuidadorID uint             `gorm:"not null"`
 	Fecha              time.Time        `gorm:"type:date"`
-	Hora               string           `gorm:"type:time"` // Asegúrate de que este tipo sea compatible con tu SGBD.
+	Hora               time.Time        `gorm:"type:timestamptz"` // Cambiado a time.Time
 	Estado             string           `gorm:"type:varchar(100);default:'pendiente'"`
 	PacienteCuidador   PacienteCuidador `gorm:"foreignKey:PacienteCuidadorID"`
 }
