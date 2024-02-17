@@ -46,7 +46,8 @@ func main() {
 	if err := db.AutoMigrate(&models.User{},
 		&models.Cuidador{},
 		&models.Paciente{},
-		&models.PacienteCuidador{}); err != nil {
+		&models.PacienteCuidador{},
+		&models.Agenda{}); err != nil {
 		log.Fatalf("Error en la automigración: %v", err)
 	}
 
@@ -63,6 +64,11 @@ func main() {
 
 	// Configura las rutas de PacienteCuidador
 	routers.SetupPacienteCuidadorRoutes(app, pcHandler)
+
+	// Instancia del repositorio y handler para Agenda
+	agendaRepo := repository.NewAgendaRepository(db)       // Asegúrate de implementar esto
+	agendaHandler := handlers.NewAgendaHandler(agendaRepo) // Y esto también
+	routers.SetupAgendaRoutes(app, agendaHandler)          // Asegúrate de implementar SetupAgendaRoutes
 
 	// Define una ruta de bienvenida
 	app.Get("/", func(c *fiber.Ctx) error {

@@ -31,3 +31,12 @@ func SetupPacienteCuidadorRoutes(app *fiber.App, pcHandler handlers.PacienteCuid
 	app.Get("/pacientecuidador/cuidadores/:pacienteId", pcHandler.GetCuidadoresByPaciente)
 	app.Get("/pacientecuidador/pacientes/:cuidadorId", pcHandler.GetPacientesByCuidador)
 }
+
+// SetupAgendaRoutes configura las rutas para la entidad Agenda.
+func SetupAgendaRoutes(app *fiber.App, agendaHandler handlers.AgendaHandler) {
+	app.Post("/agenda/insert", agendaHandler.CreateAgenda)
+	app.Put("/agenda/update/:id", agendaHandler.UpdateAgenda)
+	app.Delete("/agenda/delete/:id", agendaHandler.DeleteAgenda)
+	app.Get("/agenda/getAll", agendaHandler.GetAllAgendas)
+	app.Get("/agenda/:id", agendaHandler.GetAgendaById)
+}
