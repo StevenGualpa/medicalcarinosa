@@ -45,7 +45,8 @@ func main() {
 	// Automigración para el modelo User
 	if err := db.AutoMigrate(&models.User{},
 		&models.Cuidador{},
-		&models.Paciente{}); err != nil {
+		&models.Paciente{},
+		&models.PacienteCuidador{}); err != nil {
 		log.Fatalf("Error en la automigración: %v", err)
 	}
 
@@ -55,6 +56,13 @@ func main() {
 
 	// Configurar rutas de usuarios
 	routers.SetupUserRoutes(app, userHandler)
+
+	// Crea el repositorio y el handler para PacienteCuidador
+	pcRepo := repository.NewPacienteCuidadorRepository(db)   // Asegúrate de haber creado esta función en tu paquete repository
+	pcHandler := handlers.NewPacienteCuidadorHandler(pcRepo) // Y esta en tu paquete handlers
+
+	// Configura las rutas de PacienteCuidador
+	routers.SetupPacienteCuidadorRoutes(app, pcHandler)
 
 	// Define una ruta de bienvenida
 	app.Get("/", func(c *fiber.Ctx) error {

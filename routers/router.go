@@ -21,3 +21,13 @@ func SetupUserRoutes(app *fiber.App, userHandler handlers.UserHandler) {
 	// Aquí se agrega la nueva ruta para obtener dispositivos de Arduino
 	app.Get("/api/arduino/devices", handlers.NewArduinoHandler().GetArduinoDevices)
 }
+
+// SetupPacienteCuidadorRoutes configura las rutas para la entidad PacienteCuidador.
+func SetupPacienteCuidadorRoutes(app *fiber.App, pcHandler handlers.PacienteCuidadorHandler) {
+	app.Post("/pacientecuidador/insert", pcHandler.CreatePacienteCuidador)
+	app.Put("/pacientecuidador/update/:id", pcHandler.UpdatePacienteCuidador)
+	app.Delete("/pacientecuidador/delete/:id", pcHandler.DeletePacienteCuidador)
+	app.Get("/pacientecuidador/getAll", pcHandler.GetAllPacienteCuidador)
+	app.Get("/pacientecuidador/cuidadores/:pacienteId", pcHandler.GetCuidadoresByPaciente)
+	app.Get("/pacientecuidador/pacientes/:cuidadorId", pcHandler.GetPacientesByCuidador)
+}
