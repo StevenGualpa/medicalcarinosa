@@ -9,7 +9,7 @@ import (
 // SetupUserRoutes configura las rutas relacionadas con los usuarios.
 func SetupUserRoutes(app *fiber.App, userHandler handlers.UserHandler) {
 	app.Get("/api/getAll", userHandler.GetUsers)
-	app.Get("/user/getAllRoles", userHandler.GetUsersRoles)
+	app.Post("/user/getAllRoles", userHandler.GetUsersRoles)
 	app.Get("/api/users/:id", userHandler.GetUser)
 	app.Post("/user/insertadmin", userHandler.CreateUser)
 	app.Post("/user/insertcuidador", userHandler.CreateUser)
