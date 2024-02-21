@@ -70,6 +70,11 @@ func main() {
 	agendaHandler := handlers.NewAgendaHandler(agendaRepo) // Y esto también
 	routers.SetupAgendaRoutes(app, agendaHandler)          // Asegúrate de implementar SetupAgendaRoutes
 
+	// Instancia del repositorio y handler para Medicamentos
+	medicamentoRepo := repository.NewMedicamentoRepository(db)            // Asegúrate de implementar esto en tu paquete repository
+	medicamentoHandler := handlers.NewMedicamentoHandler(medicamentoRepo) // Y esto en tu paquete handlers
+	routers.SetupMedicamentoRoutes(app, medicamentoHandler)               // Incluye esta línea para configurar las rutas de medicamentos
+
 	// Define una ruta de bienvenida
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("¡Hola, Mundo!")

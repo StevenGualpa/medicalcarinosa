@@ -40,3 +40,12 @@ func SetupAgendaRoutes(app *fiber.App, agendaHandler handlers.AgendaHandler) {
 	app.Get("/agenda/getAll", agendaHandler.GetAllAgendas)
 	app.Get("/agenda/:id", agendaHandler.GetAgendaById)
 }
+
+// SetupMedicamentoRoutes configura las rutas para la entidad Medicamentos.
+func SetupMedicamentoRoutes(app *fiber.App, medicamentoHandler handlers.MedicamentoHandler) {
+	app.Post("/medicamento/insert", medicamentoHandler.CreateMedicamento)
+	app.Put("/medicamento/update/:id", medicamentoHandler.UpdateMedicamento)
+	app.Delete("/medicamento/delete/:id", medicamentoHandler.DeleteMedicamento)
+	app.Get("/medicamento/getAll", medicamentoHandler.GetAllMedicamentos)
+	app.Get("/medicamento/:id", medicamentoHandler.GetMedicamentoById)
+}
