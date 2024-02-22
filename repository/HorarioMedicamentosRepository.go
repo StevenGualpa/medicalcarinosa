@@ -9,7 +9,7 @@ import (
 
 type HorarioMedicamentosRepository interface {
 	Insert(pacienteID, medicamentoID uint, dosisInicial int) error
-	GetAll() ([]models.HorarioMedicamento, error)
+	GetAll() ([]models.HorarioMedicamentoDetalle, error)
 	Update(horarioMedicamento models.HorarioMedicamento) (models.HorarioMedicamento, error)
 	Delete(id uint) error
 	GetByID(id uint) (models.HorarioMedicamento, error)
@@ -46,28 +46,25 @@ func (repo *horarioMedicamentosRepository) Insert(pacienteID, medicamentoID uint
 	return nil
 }
 
-func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamento, error) {
-	var horariosMedicamentos []models.HorarioMedicamento
-	if err := repo.db.Preload("Paciente").Preload("Medicamento").Find(&horariosMedicamentos).Error; err != nil {
+func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamentoDetalle, error) {
+	var detalles []models.HorarioMedicamentoDetalle
+	// Define una consulta que une las tablas y selecciona los campos necesarios.
+	// Reemplaza "horario_medicamentos", "pacientes", "users", "medicamentos" con los nombres reales de tus tablas.
+	err := repo.db.Table("horario_medicamentos").Select(
+		"horario_medicamentos.id, horario_medicamentos.paciente_id, users.first_name, users.last_name, " +
+			"horario_medicamentos.medicamento_id, medicamentos.nombre, medicamentos.descripcion, " +
+			"medicamentos.numero_dosis, medicamentos.frecuencia, horario_medicamentos.hora_inicial, " +
+			"horario_medicamentos.hora_proxima, horario_medicamentos.dosis_restantes").
+		Joins("left join pacientes on pacientes.id = horario_medicamentos.paciente_id").
+		Joins("left join users on users.id = pacientes.user_id").
+		Joins("left join medicamentos on medicamentos.id = horario_medicamentos.medicamento_id").
+		Scan(&detalles).Error
+
+	if err != nil {
 		return nil, err
 	}
 
-	// Itera sobre los horarios de medicamentos para asegurarte de que la información del usuario está cargada
-	for i, horario := range horariosMedicamentos {
-		if horario.Paciente.User.ID == 0 {
-			var user models.User
-			// Realiza una consulta adicional para obtener la información del usuario
-			if err := repo.db.Where("id = ?", horario.Paciente.UserID).First(&user).Error; err == nil {
-				// Asigna el usuario al paciente dentro del horario de medicamento
-				horariosMedicamentos[i].Paciente.User = user
-			} else {
-				// Maneja el error si el usuario no se encuentra
-				// Puedes decidir si quieres devolver un error, continuar sin el usuario, etc.
-			}
-		}
-	}
-
-	return horariosMedicamentos, nil
+	return detalles, nil
 }
 
 func (repo *horarioMedicamentosRepository) Update(horarioMedicamento models.HorarioMedicamento) (models.HorarioMedicamento, error) {
