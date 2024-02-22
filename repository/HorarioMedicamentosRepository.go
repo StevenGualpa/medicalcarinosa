@@ -48,10 +48,25 @@ func (repo *horarioMedicamentosRepository) Insert(pacienteID, medicamentoID uint
 
 func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamento, error) {
 	var horariosMedicamentos []models.HorarioMedicamento
-	// Precarga de Paciente, y dentro de Paciente, precarga explícita de User
-	if err := repo.db.Preload("Paciente.User").Preload("Medicamento").Find(&horariosMedicamentos).Error; err != nil {
+	if err := repo.db.Preload("Paciente").Preload("Medicamento").Find(&horariosMedicamentos).Error; err != nil {
 		return nil, err
 	}
+
+	// Itera sobre los horarios de medicamentos para asegurarte de que la información del usuario está cargada
+	for i, horario := range horariosMedicamentos {
+		if horario.Paciente.User.ID == 0 {
+			var user models.User
+			// Realiza una consulta adicional para obtener la información del usuario
+			if err := repo.db.Where("id = ?", horario.Paciente.UserID).First(&user).Error; err == nil {
+				// Asigna el usuario al paciente dentro del horario de medicamento
+				horariosMedicamentos[i].Paciente.User = user
+			} else {
+				// Maneja el error si el usuario no se encuentra
+				// Puedes decidir si quieres devolver un error, continuar sin el usuario, etc.
+			}
+		}
+	}
+
 	return horariosMedicamentos, nil
 }
 
