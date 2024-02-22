@@ -48,7 +48,8 @@ func main() {
 		&models.Paciente{},
 		&models.PacienteCuidador{},
 		&models.Agenda{},
-		&models.Medicamento{}); err != nil {
+		&models.Medicamento{},
+		&models.HorarioMedicamento{}); err != nil {
 		log.Fatalf("Error en la automigración: %v", err)
 	}
 
@@ -75,6 +76,10 @@ func main() {
 	medicamentoRepo := repository.NewMedicamentoRepository(db)            // Asegúrate de implementar esto en tu paquete repository
 	medicamentoHandler := handlers.NewMedicamentoHandler(medicamentoRepo) // Y esto en tu paquete handlers
 	routers.SetupMedicamentoRoutes(app, medicamentoHandler)               // Incluye esta línea para configurar las rutas de medicamentos
+
+	horarioMedicamentosRepo := repository.NewHorarioMedicamentosRepository(db)                    // Asegúrate de tener esta función implementada
+	horarioMedicamentosHandler := handlers.NewHorarioMedicamentosHandler(horarioMedicamentosRepo) // Y esta también
+	routers.SetupHorarioMedicamentosRoutes(app, horarioMedicamentosHandler)                       // No olvides implementar esta función
 
 	// Define una ruta de bienvenida
 	app.Get("/", func(c *fiber.Ctx) error {
