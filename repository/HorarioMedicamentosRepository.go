@@ -48,26 +48,10 @@ func (repo *horarioMedicamentosRepository) Insert(pacienteID, medicamentoID uint
 
 func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamento, error) {
 	var horariosMedicamentos []models.HorarioMedicamento
-	if err := repo.db.Preload("Paciente").Preload("Medicamento").Find(&horariosMedicamentos).Error; err != nil {
+	// Precarga de Paciente, y dentro de Paciente, precarga explícita de User
+	if err := repo.db.Preload("Paciente.User").Preload("Medicamento").Find(&horariosMedicamentos).Error; err != nil {
 		return nil, err
 	}
-
-	// Cargar manualmente los datos del usuario para cada paciente, si es necesario
-	for i := range horariosMedicamentos {
-		// Si el ID del usuario asociado al paciente es no cero, intenta cargar los datos
-		if horariosMedicamentos[i].Paciente.UserID != 0 {
-			var user models.User
-			// Realiza la consulta para obtener los datos del usuario basado en UserID
-			if err := repo.db.First(&user, horariosMedicamentos[i].Paciente.UserID).Error; err == nil {
-				// Asigna los datos del usuario al paciente dentro del horario de medicamento
-				horariosMedicamentos[i].Paciente.User = user
-			} else {
-				// Manejar el error o decidir si quieres ignorarlo
-				// Por ejemplo, puedes continuar sin interrumpir el bucle, pero es importante manejar este caso adecuadamente.
-			}
-		}
-	}
-
 	return horariosMedicamentos, nil
 }
 
