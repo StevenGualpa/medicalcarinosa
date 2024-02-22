@@ -48,41 +48,22 @@ func (repo *horarioMedicamentosRepository) Insert(pacienteID, medicamentoID uint
 
 func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamento, error) {
 	var horariosMedicamentos []models.HorarioMedicamento
-	if err := repo.db.Preload("Paciente").Preload("Paciente.User").Preload("Medicamento").Find(&horariosMedicamentos).Error; err != nil {
+	if err := repo.db.Preload("Paciente").Preload("Medicamento").Find(&horariosMedicamentos).Error; err != nil {
 		return nil, err
 	}
 
-	// Recolecta los IDs de Paciente que necesitan la carga manual de User
-	pacienteIDsNecesitanUser := make([]uint, 0)
-	for _, horario := range horariosMedicamentos {
-		if horario.Paciente.User.ID == 0 && horario.Paciente.UserID != 0 {
-			pacienteIDsNecesitanUser = append(pacienteIDsNecesitanUser, horario.Paciente.UserID)
-		}
-	}
-
-	// Elimina duplicados de pacienteIDsNecesitanUser
-	uniquePacienteIDs := make(map[uint]bool)
-	for _, id := range pacienteIDsNecesitanUser {
-		uniquePacienteIDs[id] = true
-	}
-
-	// Carga todos los Users necesarios en una sola consulta si hay IDs para buscar
-	if len(uniquePacienteIDs) > 0 {
-		var users []models.User
-		if err := repo.db.Where("id IN ?", pacienteIDsNecesitanUser).Find(&users).Error; err != nil {
-			return nil, err
-		}
-
-		// Mapa para acceso rápido a los Users por ID
-		userMap := make(map[uint]models.User)
-		for _, user := range users {
-			userMap[user.ID] = user
-		}
-
-		// Asigna manualmente el User a cada Paciente necesario
-		for i, horario := range horariosMedicamentos {
-			if user, ok := userMap[horario.Paciente.UserID]; ok {
+	// Cargar manualmente los datos del usuario para cada paciente, si es necesario
+	for i := range horariosMedicamentos {
+		// Si el ID del usuario asociado al paciente es no cero, intenta cargar los datos
+		if horariosMedicamentos[i].Paciente.UserID != 0 {
+			var user models.User
+			// Realiza la consulta para obtener los datos del usuario basado en UserID
+			if err := repo.db.First(&user, horariosMedicamentos[i].Paciente.UserID).Error; err == nil {
+				// Asigna los datos del usuario al paciente dentro del horario de medicamento
 				horariosMedicamentos[i].Paciente.User = user
+			} else {
+				// Manejar el error o decidir si quieres ignorarlo
+				// Por ejemplo, puedes continuar sin interrumpir el bucle, pero es importante manejar este caso adecuadamente.
 			}
 		}
 	}
