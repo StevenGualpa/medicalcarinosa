@@ -47,11 +47,23 @@ func (repo *horarioMedicamentosRepository) Insert(pacienteID, medicamentoID uint
 }
 
 func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamento, error) {
-	var horarios []models.HorarioMedicamento
-	if err := repo.db.Preload("Paciente").Preload("Paciente.User").Preload("Medicamento").Find(&horarios).Error; err != nil {
+	var horariosMedicamentos []models.HorarioMedicamento
+	if err := repo.db.Preload("Paciente").Preload("Paciente.User").Preload("Medicamento").Find(&horariosMedicamentos).Error; err != nil {
 		return nil, err
 	}
-	return horarios, nil
+
+	// Una vez que tienes los registros, asegúrate de que el ID del usuario no es cero
+	// y si es así, puedes intentar cargar los datos del usuario manualmente
+	for i, horario := range horariosMedicamentos {
+		if horario.Paciente.User.ID == 0 && horario.Paciente.UserID != 0 {
+			var user models.User
+			if err := repo.db.First(&user, horario.Paciente.UserID).Error; err == nil {
+				horariosMedicamentos[i].Paciente.User = user
+			}
+		}
+	}
+
+	return horariosMedicamentos, nil
 }
 
 func (repo *horarioMedicamentosRepository) Update(horarioMedicamento models.HorarioMedicamento) (models.HorarioMedicamento, error) {
