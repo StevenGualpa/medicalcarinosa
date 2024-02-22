@@ -52,12 +52,36 @@ func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamento
 		return nil, err
 	}
 
-	// Una vez que tienes los registros, asegúrate de que el ID del usuario no es cero
-	// y si es así, puedes intentar cargar los datos del usuario manualmente
-	for i, horario := range horariosMedicamentos {
+	// Recolecta los IDs de Paciente que necesitan la carga manual de User
+	pacienteIDsNecesitanUser := make([]uint, 0)
+	for _, horario := range horariosMedicamentos {
 		if horario.Paciente.User.ID == 0 && horario.Paciente.UserID != 0 {
-			var user models.User
-			if err := repo.db.First(&user, horario.Paciente.UserID).Error; err == nil {
+			pacienteIDsNecesitanUser = append(pacienteIDsNecesitanUser, horario.Paciente.UserID)
+		}
+	}
+
+	// Elimina duplicados de pacienteIDsNecesitanUser
+	uniquePacienteIDs := make(map[uint]bool)
+	for _, id := range pacienteIDsNecesitanUser {
+		uniquePacienteIDs[id] = true
+	}
+
+	// Carga todos los Users necesarios en una sola consulta si hay IDs para buscar
+	if len(uniquePacienteIDs) > 0 {
+		var users []models.User
+		if err := repo.db.Where("id IN ?", pacienteIDsNecesitanUser).Find(&users).Error; err != nil {
+			return nil, err
+		}
+
+		// Mapa para acceso rápido a los Users por ID
+		userMap := make(map[uint]models.User)
+		for _, user := range users {
+			userMap[user.ID] = user
+		}
+
+		// Asigna manualmente el User a cada Paciente necesario
+		for i, horario := range horariosMedicamentos {
+			if user, ok := userMap[horario.Paciente.UserID]; ok {
 				horariosMedicamentos[i].Paciente.User = user
 			}
 		}
