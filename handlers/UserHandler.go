@@ -148,7 +148,7 @@ func (h *userHandler) Login(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": "Bad Request"})
 	}
 
-	user, message, err := h.repo.Login(loginInfo.Email, loginInfo.Password)
+	user, message, err := h.repo.Login2(loginInfo.Email, loginInfo.Password)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": message})
 	}

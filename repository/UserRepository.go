@@ -15,6 +15,8 @@ type UserRepository interface {
 	GetAllUsers() ([]models.User, int, error)
 	GetAllUsersWithRoleFilter(role string) ([]models.User, int, error) // Nuevo método agregado
 	Login(email, password string) (models.User, string, error)
+	Login2(email, password string) (models.User, string, error)
+
 	CreateUserWithRole(user models.User, roleData interface{}) (models.User, error)
 }
 
@@ -186,4 +188,41 @@ func isValidEcuadorianID(id string) bool {
 	}
 
 	return checkDigit == lastDigit
+}
+
+func (r *userRepository) Login2(email, password string) (models.User, string, error) {
+	var user models.User
+	// Primero verifica si el usuario existe y si la contraseña es correcta
+	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+		return models.User{}, "Correo no existe", err
+	}
+
+	// Aquí deberías incluir la lógica para verificar la contraseña hasheada
+	if user.Password != password { // Simplificación; usa bcrypt en producción
+		return models.User{}, "Clave incorrecta", errors.New("clave incorrecta")
+	}
+
+	// Según el rol del usuario, realiza la consulta adicional necesaria
+	if user.Roles == "admin" {
+		// Lógica para el rol de admin
+		// Realiza la consulta específica de admin y actualiza el usuario si es necesario
+	} else if user.Roles == "paciente" {
+		// Lógica para el rol de paciente
+		// Realiza la consulta específica de paciente y actualiza el usuario si es necesario
+		var paciente models.Paciente
+		if err := r.db.Where("user_id = ?", user.ID).First(&paciente).Error; err != nil {
+			return models.User{}, "Paciente no encontrado", err
+		}
+		user.Paciente = &paciente
+	} else if user.Roles == "cuidador" {
+		// Lógica para el rol de cuidador
+		// Realiza la consulta específica de cuidador y actualiza el usuario si es necesario
+		var cuidador models.Cuidador
+		if err := r.db.Where("user_id = ?", user.ID).First(&cuidador).Error; err != nil {
+			return models.User{}, "Cuidador no encontrado", err
+		}
+		user.Cuidador = &cuidador
+	}
+
+	return user, "Éxito", nil
 }
