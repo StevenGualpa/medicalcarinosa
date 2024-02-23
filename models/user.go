@@ -12,7 +12,8 @@ type User struct {
 	BirthDate   string    `json:"birthdate"`
 	Gender      string    `json:"gender"`
 	PhoneNumber string    `json:"phone"`
-	Roles       string    `json:"roles"` // Define el rol del usuario ("cuidador", "paciente", "admin", etc.).
+	Roles       string    `json:"roles"`                // Define el rol del usuario ("cuidador", "paciente", "admin", etc.).
+	Cedula      string    `json:"cedula" gorm:"unique"` // Campo cédula agregado aquí
 	Cuidador    *Cuidador `gorm:"foreignKey:UserID"`
 	Paciente    *Paciente `gorm:"foreignKey:UserID"`
 }

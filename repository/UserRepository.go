@@ -4,6 +4,7 @@ import (
 	"GolandProyectos/models"
 	"errors"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 type UserRepository interface {
@@ -78,6 +79,11 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 		}
 	}()
 
+	// Verifica la cédula ecuatoriana antes de crear el usuario
+	if !isValidEcuadorianID(user.Cedula) {
+		return models.User{}, errors.New("la cédula proporcionada no es válida")
+	}
+
 	// Verificar si el correo electrónico ya está registrado
 	var count int64
 	tx.Model(&models.User{}).Where("email = ?", user.Email).Count(&count)
@@ -127,6 +133,8 @@ func (r *userRepository) CreateUserWithRole(user models.User, roleData interface
 	return user, nil
 }
 
+// Asegúrate de que la función isValidEcuadorianID esté accesible para este paquete o esté definida dentro del mismo.
+
 func (r *userRepository) UpdateUser(user models.User) (models.User, error) {
 	result := r.db.Save(&user)
 	return user, result.Error
@@ -149,4 +157,33 @@ func (r *userRepository) Login(email, password string) (models.User, string, err
 	}
 
 	return user, "Éxito", nil
+}
+
+func isValidEcuadorianID(id string) bool {
+	if len(id) != 10 {
+		return false
+	}
+
+	coefficients := []int{2, 1, 2, 1, 2, 1, 2, 1, 2}
+	sum := 0
+
+	for i := 0; i < 9; i++ {
+		digit, _ := strconv.Atoi(string(id[i]))
+		result := coefficients[i] * digit
+
+		if result >= 10 {
+			result -= 9
+		}
+		sum += result
+	}
+
+	lastDigit, _ := strconv.Atoi(string(id[9]))
+	remainder := sum % 10
+	checkDigit := 0
+
+	if remainder != 0 {
+		checkDigit = 10 - remainder
+	}
+
+	return checkDigit == lastDigit
 }
