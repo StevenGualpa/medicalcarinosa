@@ -42,6 +42,7 @@ func main() {
 		log.Fatalf("Error al conectar con la base de datos: %v", err)
 	}
 
+	//NUEVOS CAMBIOS
 	// Automigración para el modelo User
 	if err := db.AutoMigrate(&models.User{},
 		&models.Cuidador{},
