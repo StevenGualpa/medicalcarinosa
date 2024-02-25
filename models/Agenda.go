@@ -28,7 +28,5 @@ type AgendaDetalle struct {
 	PacienteID       uint      `json:"paciente_id"`
 	PacienteNombre   string    `json:"paciente_nombre"`
 	PacienteApellido string    `json:"paciente_apellido"`
-	CuidadorID       uint      `json:"cuidador_id"`
-	CuidadorNombre   string    `json:"cuidador_nombre"`
-	CuidadorApellido string    `json:"cuidador_apellido"`
+	// Nota: CuidadorID, CuidadorNombre, y CuidadorApellido han sido removidos
 }

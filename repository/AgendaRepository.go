@@ -44,15 +44,20 @@ func (r *agendaRepository) GetAll() ([]models.AgendaDetalle, error) {
 
 	// Tu consulta SQL personalizada
 	query := `
-    SELECT ag.id, ag.nombre, ag.descripcion, ag.fecha, ag.hora, ag.estado,
-           pa.id as paciente_id, us1.first_name as paciente_nombre, us1.last_name as paciente_apellido,
-           cu.id as cuidador_id, us2.first_name as cuidador_nombre, us2.last_name as cuidador_apellido
-    FROM agendas as ag
-    JOIN paciente_cuidadors as pc ON ag.paciente_cuidador_id = pc.id
-    JOIN pacientes as pa ON pc.paciente_id = pa.id
-    JOIN cuidadors as cu ON pc.cuidador_id = cu.id
-    JOIN users as us1 ON pa.user_id = us1.id
-    JOIN users as us2 ON cu.user_id = us2.id
+	SELECT 
+	  ag.id, 
+	  ag.nombre, 
+	  ag.descripcion, 
+	  ag.fecha, 
+	  ag.hora, 
+	  ag.estado,
+	  pa.id AS paciente_id, 
+	  us.first_name AS paciente_nombre, 
+	  us.last_name AS paciente_apellido
+	FROM 
+	  agendas AS ag
+	  INNER JOIN pacientes AS pa ON ag.paciente_id = pa.id
+	  INNER JOIN users AS us ON pa.user_id = us.id
     `
 
 	// Ejecutar la consulta
