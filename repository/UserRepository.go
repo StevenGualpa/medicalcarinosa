@@ -16,6 +16,7 @@ type UserRepository interface {
 	GetAllUsersWithRoleFilter(role string) ([]models.User, int, error) // Nuevo método agregado
 	Login(email, password string) (models.User, string, error)
 	Login2(email, password string) (models.User, string, error)
+	Login3(email, password, deviceToken string) (models.User, string, error)
 
 	CreateUserWithRole(user models.User, roleData interface{}) (models.User, error)
 }
@@ -222,6 +223,51 @@ func (r *userRepository) Login2(email, password string) (models.User, string, er
 			return models.User{}, "Cuidador no encontrado", err
 		}
 		user.Cuidador = &cuidador
+	}
+
+	return user, "Éxito", nil
+}
+
+func (r *userRepository) Login3(email, password, deviceToken string) (models.User, string, error) {
+	var user models.User
+	// Verifica si el usuario existe y si la contraseña es correcta
+	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+		return models.User{}, "Correo no existe", err
+	}
+
+	// Aquí deberías incluir la lógica para verificar la contraseña hasheada
+	if user.Password != password { // Simplificación; usa bcrypt en producción
+		return models.User{}, "Clave incorrecta", errors.New("clave incorrecta")
+	}
+
+	// Lógica de roles
+	if user.Roles == "admin" {
+		// Lógica para admin
+	} else if user.Roles == "paciente" {
+		var paciente models.Paciente
+		if err := r.db.Where("user_id = ?", user.ID).First(&paciente).Error; err != nil {
+			return models.User{}, "Paciente no encontrado", err
+		}
+		user.Paciente = &paciente
+	} else if user.Roles == "cuidador" {
+		var cuidador models.Cuidador
+		if err := r.db.Where("user_id = ?", user.ID).First(&cuidador).Error; err != nil {
+			return models.User{}, "Cuidador no encontrado", err
+		}
+		user.Cuidador = &cuidador
+	}
+
+	// Manejo del token del dispositivo
+	var deviceTokenRecord models.DeviceToken
+	updateResult := r.db.Where("usuario_id = ?", user.ID).First(&deviceTokenRecord)
+
+	if updateResult.Error == nil {
+		// Si el token ya existe, actualízalo
+		r.db.Model(&models.DeviceToken{}).Where("usuario_id = ?", user.ID).Update("token", deviceToken)
+	} else {
+		// Si el token no existe, créalo
+		newDeviceToken := models.DeviceToken{Token: deviceToken, UsuarioID: user.ID}
+		r.db.Create(&newDeviceToken)
 	}
 
 	return user, "Éxito", nil

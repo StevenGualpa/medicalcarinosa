@@ -141,18 +141,21 @@ func (h *userHandler) DeleteUser(c *fiber.Ctx) error {
 
 func (h *userHandler) Login(c *fiber.Ctx) error {
 	var loginInfo struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-	if err := c.BodyParser(&loginInfo); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Bad Request"})
+		Email       string `json:"email"`
+		Password    string `json:"password"`
+		DeviceToken string `json:"deviceToken"`
 	}
 
-	user, message, err := h.repo.Login2(loginInfo.Email, loginInfo.Password)
+	if err := c.BodyParser(&loginInfo); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Bad Request"})
+	}
+
+	user, message, err := h.repo.Login3(loginInfo.Email, loginInfo.Password, loginInfo.DeviceToken)
 	if err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": message})
 	}
 
+	// Devuelve el usuario y un mensaje de éxito
 	return c.JSON(fiber.Map{"message": message, "user": user})
 }
 
