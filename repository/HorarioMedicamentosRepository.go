@@ -12,6 +12,8 @@ type HorarioMedicamentosRepository interface {
 	InsertFinal(pacienteID, medicamentoID uint, dosisInicial, frecuencia int) error
 
 	GetAll() ([]models.HorarioMedicamentoDetalle, error)
+	GetAll2() ([]models.HorarioMedicineDetalle, error)
+
 	Update(horarioMedicamento models.HorarioMedicamento) (models.HorarioMedicamento, error)
 	Delete(id uint) error
 	GetByID(id uint) (models.HorarioMedicamento, error)
@@ -61,6 +63,26 @@ func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamento
 		Joins("left join users on users.id = pacientes.user_id").
 		Joins("left join medicamentos on medicamentos.id = horario_medicamentos.medicamento_id").
 		Scan(&detalles).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return detalles, nil
+}
+
+func (repo *horarioMedicamentosRepository) GetAll2() ([]models.HorarioMedicineDetalle, error) {
+	var detalles []models.HorarioMedicineDetalle
+	// Utiliza la consulta SQL actualizada conforme a tus indicaciones.
+	err := repo.db.Raw(`
+        SELECT hm.id, hm.paciente_id, us.first_name, us.last_name,
+               hm.medicamento_id, md.nombre, md.descripcion,
+               hm.frecuencia, hm.dosis_restantes, hm.hora_inicial, hm.hora_proxima
+        FROM horario_medicines AS hm
+        JOIN medicines AS md ON hm.medicamento_id = md.id
+        JOIN pacientes AS pc ON hm.paciente_id = pc.id
+        JOIN users AS us ON pc.user_id = us.id
+    `).Scan(&detalles).Error
 
 	if err != nil {
 		return nil, err

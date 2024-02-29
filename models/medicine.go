@@ -33,7 +33,6 @@ type HorarioMedicineDetalle struct {
 	MedicamentoID  uint      `json:"medicamento_id"`
 	Nombre         string    `json:"nombre"`
 	Descripcion    string    `json:"descripcion"`
-	NumeroDosis    int       `json:"numero_dosis"`
 	Frecuencia     int       `json:"frecuencia"`
 	HoraInicial    time.Time `json:"hora_inicial"`
 	HoraProxima    time.Time `json:"hora_proxima"`

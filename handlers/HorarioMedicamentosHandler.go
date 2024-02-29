@@ -40,7 +40,7 @@ func (h *horarioMedicamentosHandler) Insert(c *fiber.Ctx) error {
 }
 
 func (h *horarioMedicamentosHandler) GetAll(c *fiber.Ctx) error {
-	horariosMedicamentos, err := h.repo.GetAll()
+	horariosMedicamentos, err := h.repo.GetAll2()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error retrieving schedules"})
 	}
