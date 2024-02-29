@@ -37,7 +37,7 @@ func (repo *horarioMedicamentosRepository) Insert(pacienteID, medicamentoID uint
 			PacienteID:     pacienteID,
 			MedicamentoID:  medicamentoID,
 			HoraInicial:    horaActual,
-			HoraProxima:    horaActual.Add(time.Duration(medicamento.Frecuencia) * time.Hour),
+			HoraProxima:    horaActual.Add(time.Duration(5) * time.Hour),
 			DosisRestantes: dosisInicial - i,
 		}
 		if err := repo.db.Create(&horario).Error; err != nil {
