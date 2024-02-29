@@ -10,8 +10,6 @@ type Medicine struct {
 	gorm.Model
 	Nombre      string `json:"nombre"`
 	Descripcion string `json:"descripcion"`
-	NumeroDosis int    `json:"numeroDosis"`
-	Frecuencia  int    `json:"frecuencia"`
 }
 
 type HorarioMedicine struct {
