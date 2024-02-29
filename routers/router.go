@@ -52,6 +52,6 @@ func SetupMedicamentoRoutes(app *fiber.App, MedicineHandler handlers.MedicineHan
 
 // SetupHorarioMedicamentosRoutes configura las rutas para la entidad HorarioMedicamentos.
 func SetupHorarioMedicamentosRoutes(app *fiber.App, horarioMedicamentosHandler handlers.HorarioMedicamentosHandler) {
-	app.Post("/horariomedicamentos/insert", horarioMedicamentosHandler.Insert)
+	app.Post("/horariomedicamentos/insert", horarioMedicamentosHandler.Insert2)
 	app.Get("/horariomedicamentos/getAll", horarioMedicamentosHandler.GetAll)
 }
