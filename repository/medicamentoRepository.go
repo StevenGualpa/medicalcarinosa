@@ -6,45 +6,45 @@ import (
 	"gorm.io/gorm"
 )
 
-type MedicamentoRepository interface {
-	Create(medicamento models.Medicamento) (models.Medicamento, error)
-	Update(medicamento models.Medicamento) (models.Medicamento, error)
+type MedicineRepository interface {
+	Create(medicine models.Medicine) (models.Medicine, error)
+	Update(medicine models.Medicine) (models.Medicine, error)
 	Delete(id uint) error
-	GetAll() ([]models.Medicamento, error)
-	GetById(id uint) (models.Medicamento, error)
+	GetAll() ([]models.Medicine, error)
+	GetById(id uint) (models.Medicine, error)
 }
 
-type medicamentoRepository struct {
+type medicineRepository struct {
 	db *gorm.DB
 }
 
-func NewMedicamentoRepository(db *gorm.DB) MedicamentoRepository {
-	return &medicamentoRepository{db}
+func NewMedicineRepository(db *gorm.DB) MedicineRepository {
+	return &medicineRepository{db}
 }
 
-func (r *medicamentoRepository) Create(medicamento models.Medicamento) (models.Medicamento, error) {
-	result := r.db.Create(&medicamento)
-	return medicamento, result.Error
+func (r *medicineRepository) Create(medicine models.Medicine) (models.Medicine, error) {
+	result := r.db.Create(&medicine)
+	return medicine, result.Error
 }
 
-func (r *medicamentoRepository) Update(medicamento models.Medicamento) (models.Medicamento, error) {
-	result := r.db.Save(&medicamento)
-	return medicamento, result.Error
+func (r *medicineRepository) Update(medicine models.Medicine) (models.Medicine, error) {
+	result := r.db.Save(&medicine)
+	return medicine, result.Error
 }
 
-func (r *medicamentoRepository) Delete(id uint) error {
-	result := r.db.Delete(&models.Medicamento{}, id)
+func (r *medicineRepository) Delete(id uint) error {
+	result := r.db.Delete(&models.Medicine{}, id)
 	return result.Error
 }
 
-func (r *medicamentoRepository) GetAll() ([]models.Medicamento, error) {
-	var medicamentos []models.Medicamento
-	result := r.db.Find(&medicamentos)
-	return medicamentos, result.Error
+func (r *medicineRepository) GetAll() ([]models.Medicine, error) {
+	var medicines []models.Medicine
+	result := r.db.Find(&medicines)
+	return medicines, result.Error
 }
 
-func (r *medicamentoRepository) GetById(id uint) (models.Medicamento, error) {
-	var medicamento models.Medicamento
-	result := r.db.First(&medicamento, id)
-	return medicamento, result.Error
+func (r *medicineRepository) GetById(id uint) (models.Medicine, error) {
+	var medicine models.Medicine
+	result := r.db.First(&medicine, id)
+	return medicine, result.Error
 }

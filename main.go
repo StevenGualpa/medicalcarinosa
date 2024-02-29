@@ -50,7 +50,9 @@ func main() {
 		&models.PacienteCuidador{},
 		&models.Agenda{},
 		&models.Medicamento{},
-		&models.HorarioMedicamento{}); err != nil {
+		&models.HorarioMedicamento{},
+		&models.HorarioMedicine{},
+		&models.Medicine{}); err != nil {
 		log.Fatalf("Error en la automigración: %v", err)
 	}
 

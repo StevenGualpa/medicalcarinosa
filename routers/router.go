@@ -42,12 +42,12 @@ func SetupAgendaRoutes(app *fiber.App, agendaHandler handlers.AgendaHandler) {
 }
 
 // SetupMedicamentoRoutes configura las rutas para la entidad Medicamentos.
-func SetupMedicamentoRoutes(app *fiber.App, medicamentoHandler handlers.MedicamentoHandler) {
-	app.Post("/medicamento/insert", medicamentoHandler.CreateMedicamento)
-	app.Put("/medicamento/update/:id", medicamentoHandler.UpdateMedicamento)
-	app.Delete("/medicamento/delete/:id", medicamentoHandler.DeleteMedicamento)
-	app.Get("/medicamento/getAll", medicamentoHandler.GetAllMedicamentos)
-	app.Get("/medicamento/:id", medicamentoHandler.GetMedicamentoById)
+func SetupMedicamentoRoutes(app *fiber.App, MedicineHandler handlers.MedicineHandler) {
+	app.Post("/medicamento/insert", MedicineHandler.CreateMedicine)
+	app.Put("/medicamento/update/:id", MedicineHandler.UpdateMedicine)
+	app.Delete("/medicamento/delete/:id", MedicineHandler.DeleteMedicine)
+	app.Get("/medicamento/getAll", MedicineHandler.GetAllMedicines)
+	app.Get("/medicamento/:id", MedicineHandler.GetMedicineById)
 }
 
 // SetupHorarioMedicamentosRoutes configura las rutas para la entidad HorarioMedicamentos.

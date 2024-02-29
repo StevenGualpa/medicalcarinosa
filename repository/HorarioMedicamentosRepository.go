@@ -9,6 +9,8 @@ import (
 
 type HorarioMedicamentosRepository interface {
 	Insert(pacienteID, medicamentoID uint, dosisInicial int) error
+	InsertFinal(pacienteID, medicamentoID uint, dosisInicial, frecuencia int) error
+
 	GetAll() ([]models.HorarioMedicamentoDetalle, error)
 	Update(horarioMedicamento models.HorarioMedicamento) (models.HorarioMedicamento, error)
 	Delete(id uint) error
@@ -87,4 +89,24 @@ func (repo *horarioMedicamentosRepository) GetByID(id uint) (models.HorarioMedic
 		return models.HorarioMedicamento{}, err
 	}
 	return horario, nil
+}
+
+// Metodos para el baboso de jordy
+func (repo *horarioMedicamentosRepository) InsertFinal(pacienteID, medicamentoID uint, dosisInicial, frecuencia int) error {
+	horaActual := time.Now()
+	for i := 0; i < dosisInicial; i++ {
+		horario := models.HorarioMedicine{
+			PacienteID:     pacienteID,
+			MedicamentoID:  medicamentoID,
+			HoraInicial:    horaActual,
+			HoraProxima:    horaActual.Add(time.Duration(frecuencia) * time.Hour),
+			DosisRestantes: dosisInicial - i,
+			Frecuencia:     frecuencia, // Asumiendo que agregaste este campo según los nuevos cambios
+		}
+		if err := repo.db.Create(&horario).Error; err != nil {
+			return err
+		}
+		horaActual = horario.HoraProxima
+	}
+	return nil
 }

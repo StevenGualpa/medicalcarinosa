@@ -8,57 +8,57 @@ import (
 	"strconv"
 )
 
-type MedicamentoHandler interface {
-	CreateMedicamento(c *fiber.Ctx) error
-	UpdateMedicamento(c *fiber.Ctx) error
-	DeleteMedicamento(c *fiber.Ctx) error
-	GetAllMedicamentos(c *fiber.Ctx) error
-	GetMedicamentoById(c *fiber.Ctx) error
+type MedicineHandler interface {
+	CreateMedicine(c *fiber.Ctx) error
+	UpdateMedicine(c *fiber.Ctx) error
+	DeleteMedicine(c *fiber.Ctx) error
+	GetAllMedicines(c *fiber.Ctx) error
+	GetMedicineById(c *fiber.Ctx) error
 }
 
-type medicamentoHandler struct {
-	repo repository.MedicamentoRepository
+type medicineHandler struct {
+	repo repository.MedicineRepository
 }
 
-func NewMedicamentoHandler(repo repository.MedicamentoRepository) MedicamentoHandler {
-	return &medicamentoHandler{repo: repo}
+func NewMedicineHandler(repo repository.MedicineRepository) MedicineHandler {
+	return &medicineHandler{repo: repo}
 }
 
-func (h *medicamentoHandler) CreateMedicamento(c *fiber.Ctx) error {
-	var medicamento models.Medicamento
-	if err := c.BodyParser(&medicamento); err != nil {
+func (h *medicineHandler) CreateMedicine(c *fiber.Ctx) error {
+	var medicine models.Medicine
+	if err := c.BodyParser(&medicine); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	createdMedicamento, err := h.repo.Create(medicamento)
+	createdMedicine, err := h.repo.Create(medicine)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(createdMedicamento)
+	return c.Status(fiber.StatusCreated).JSON(createdMedicine)
 }
 
-func (h *medicamentoHandler) UpdateMedicamento(c *fiber.Ctx) error {
+func (h *medicineHandler) UpdateMedicine(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	var medicamento models.Medicamento
-	if err := c.BodyParser(&medicamento); err != nil {
+	var medicine models.Medicine
+	if err := c.BodyParser(&medicine); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-	medicamento.ID = uint(id)
+	medicine.ID = uint(id)
 
-	updatedMedicamento, err := h.repo.Update(medicamento)
+	updatedMedicine, err := h.repo.Update(medicine)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(updatedMedicamento)
+	return c.JSON(updatedMedicine)
 }
 
-func (h *medicamentoHandler) DeleteMedicamento(c *fiber.Ctx) error {
+func (h *medicineHandler) DeleteMedicine(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
@@ -71,25 +71,25 @@ func (h *medicamentoHandler) DeleteMedicamento(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 }
 
-func (h *medicamentoHandler) GetAllMedicamentos(c *fiber.Ctx) error {
-	medicamentos, err := h.repo.GetAll()
+func (h *medicineHandler) GetAllMedicines(c *fiber.Ctx) error {
+	medicines, err := h.repo.GetAll()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(medicamentos)
+	return c.JSON(medicines)
 }
 
-func (h *medicamentoHandler) GetMedicamentoById(c *fiber.Ctx) error {
+func (h *medicineHandler) GetMedicineById(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	medicamento, err := h.repo.GetById(uint(id))
+	medicine, err := h.repo.GetById(uint(id))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(medicamento)
+	return c.JSON(medicine)
 }
