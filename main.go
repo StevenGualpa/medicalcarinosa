@@ -85,6 +85,13 @@ func main() {
 	horarioMedicamentosHandler := handlers.NewHorarioMedicamentosHandler(horarioMedicamentosRepo) // Y esta también
 	routers.SetupHorarioMedicamentosRoutes(app, horarioMedicamentosHandler)                       // No olvides implementar esta función
 
+	// Crea la instancia del repositorio de tokens de dispositivos.
+	deviceTokenRepo := repository.NewDeviceTokenRepository(db)
+	// Crea la instancia del handler de notificaciones.
+	notificationHandler := handlers.NewNotificationHandler(deviceTokenRepo)
+	// Configura las rutas de notificaciones.
+	routers.SetupNotificationRoutes(app, notificationHandler)
+
 	// Define una ruta de bienvenida
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("¡Hola, Mundo!")

@@ -55,3 +55,9 @@ func SetupHorarioMedicamentosRoutes(app *fiber.App, horarioMedicamentosHandler h
 	app.Post("/horariomedicamentos/insert", horarioMedicamentosHandler.Insert2)
 	app.Get("/horariomedicamentos/getAll", horarioMedicamentosHandler.GetAll)
 }
+
+// Asume que esta función se añade a routers/user_router.go o a un nuevo archivo específico para rutas de notificaciones.
+
+func SetupNotificationRoutes(app *fiber.App, notificationHandler *handlers.NotificationHandler) {
+	app.Post("/api/send", notificationHandler.SendNotifications)
+}
