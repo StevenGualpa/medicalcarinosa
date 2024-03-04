@@ -52,7 +52,8 @@ func main() {
 		&models.Medicamento{},
 		&models.HorarioMedicamento{},
 		&models.HorarioMedicine{},
-		&models.Medicine{}); err != nil {
+		&models.Medicine{},
+		&models.DeviceToken{}); err != nil {
 		log.Fatalf("Error en la automigración: %v", err)
 	}
 
