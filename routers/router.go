@@ -60,4 +60,6 @@ func SetupHorarioMedicamentosRoutes(app *fiber.App, horarioMedicamentosHandler h
 
 func SetupNotificationRoutes(app *fiber.App, notificationHandler *handlers.NotificationHandler) {
 	app.Post("/api/send", notificationHandler.SendNotifications)
+	app.Post("/api/sendp", notificationHandler.SendNotifications1)
+
 }
