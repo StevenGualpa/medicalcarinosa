@@ -60,14 +60,16 @@ func (h *agendaHandler) UpdateAgenda(c *fiber.Ctx) error {
 func (h *agendaHandler) DeleteAgenda(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID inválido"})
 	}
 
 	if err := h.repo.Delete(uint(id)); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		// Personaliza este mensaje según necesites
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al eliminar la agenda"})
 	}
 
-	return c.SendStatus(fiber.StatusNoContent)
+	// Retorna un mensaje JSON indicando éxito en lugar de solo el status
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"mensaje": "Eliminado con éxito"})
 }
 
 func (h *agendaHandler) GetAllAgendas(c *fiber.Ctx) error {

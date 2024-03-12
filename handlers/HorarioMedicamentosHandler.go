@@ -4,12 +4,14 @@ package handlers
 import (
 	"GolandProyectos/repository"
 	"github.com/gofiber/fiber/v2"
+	"strconv"
 )
 
 type HorarioMedicamentosHandler interface {
 	Insert(c *fiber.Ctx) error
 	Insert2(c *fiber.Ctx) error
 	GetAll(c *fiber.Ctx) error
+	Delete(c *fiber.Ctx) error
 }
 
 type horarioMedicamentosHandler struct {
@@ -67,4 +69,23 @@ func (h *horarioMedicamentosHandler) Insert2(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Schedule created successfully"})
+}
+
+func (h *horarioMedicamentosHandler) Delete(c *fiber.Ctx) error {
+	// Obtener el ID desde los parámetros de la URL
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		// Si el ID no es válido, devuelve un error
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID inválido"})
+	}
+
+	// Intentar eliminar el horario de medicamento con el ID especificado
+	err = h.repo.Delete(uint(id))
+	if err != nil {
+		// Si ocurre un error durante la eliminación, devuelve un error
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al eliminar el horario de medicamento"})
+	}
+
+	// Si la eliminación es exitosa, devuelve un mensaje de éxito
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Horario de medicamento eliminado con éxito"})
 }

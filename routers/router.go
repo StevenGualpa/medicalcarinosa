@@ -54,6 +54,7 @@ func SetupMedicamentoRoutes(app *fiber.App, MedicineHandler handlers.MedicineHan
 func SetupHorarioMedicamentosRoutes(app *fiber.App, horarioMedicamentosHandler handlers.HorarioMedicamentosHandler) {
 	app.Post("/horariomedicamentos/insert", horarioMedicamentosHandler.Insert2)
 	app.Get("/horariomedicamentos/getAll", horarioMedicamentosHandler.GetAll)
+	app.Delete("/horariomedicamentos/delete/:id", horarioMedicamentosHandler.Delete)
 }
 
 // Asume que esta función se añade a routers/user_router.go o a un nuevo archivo específico para rutas de notificaciones.
@@ -61,5 +62,4 @@ func SetupHorarioMedicamentosRoutes(app *fiber.App, horarioMedicamentosHandler h
 func SetupNotificationRoutes(app *fiber.App, notificationHandler *handlers.NotificationHandler) {
 	app.Post("/api/send", notificationHandler.SendNotifications)
 	app.Post("/api/sendp", notificationHandler.SendNotifications1)
-
 }
