@@ -102,7 +102,7 @@ func (repo *horarioMedicamentosRepository) Update(horarioMedicamento models.Hora
 }
 
 func (repo *horarioMedicamentosRepository) Delete(id uint) error {
-	if err := repo.db.Delete(&models.HorarioMedicamento{}, id).Error; err != nil {
+	if err := repo.db.Delete(&models.HorarioMedicine{}, id).Error; err != nil {
 		return err
 	}
 	return nil
@@ -137,7 +137,7 @@ func (repo *horarioMedicamentosRepository) InsertFinal(pacienteID, medicamentoID
 }
 
 func (repo *horarioMedicamentosRepository) Delete2(pacienteID, medicamentoID uint) error {
-	result := repo.db.Where("paciente_id = ? AND medicamento_id = ?", pacienteID, medicamentoID).Delete(&models.HorarioMedicamento{})
+	result := repo.db.Where("paciente_id = ? AND medicamento_id = ?", pacienteID, medicamentoID).Delete(&models.HorarioMedicine{})
 	if result.Error != nil {
 		return result.Error
 	}
