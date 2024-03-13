@@ -50,7 +50,6 @@ func main() {
 		&models.PacienteCuidador{},
 		&models.Agenda{},
 		&models.Medicamento{},
-		&models.HorarioMedicamento{},
 		&models.HorarioMedicine{},
 		&models.Medicine{},
 		&models.DeviceToken{}); err != nil {

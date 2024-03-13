@@ -12,7 +12,7 @@ type HorarioMedicamentosRepository interface {
 	InsertFinal(pacienteID, medicamentoID uint, dosisInicial, frecuencia int) error
 
 	GetAll() ([]models.HorarioMedicamentoDetalle, error)
-	GetAll2() ([]models.HorarioMedicineDetalle, error)
+	GetAll2() ([]models.HorarioMedicineDetalle, int, error)
 
 	Update(horarioMedicamento models.HorarioMedicamento) (models.HorarioMedicamento, error)
 	Delete(id uint) error
@@ -72,9 +72,14 @@ func (repo *horarioMedicamentosRepository) GetAll() ([]models.HorarioMedicamento
 	return detalles, nil
 }
 
-func (repo *horarioMedicamentosRepository) GetAll2() ([]models.HorarioMedicineDetalle, error) {
+func (repo *horarioMedicamentosRepository) GetAll2() ([]models.HorarioMedicineDetalle, int, error) {
 	var detalles []models.HorarioMedicineDetalle
-	// Utiliza la consulta SQL actualizada conforme a tus indicaciones.
+	var count int64
+
+	// Primero, cuenta la cantidad de elementos que cumplen con la condición
+	repo.db.Model(&models.HorarioMedicine{}).Where("deleted_at IS NULL").Count(&count)
+
+	// Luego, ejecuta la consulta para obtener los detalles
 	err := repo.db.Raw(`
         SELECT hm.id, hm.paciente_id, us.first_name, us.last_name,
                hm.medicamento_id, md.nombre, md.descripcion,
@@ -83,15 +88,14 @@ func (repo *horarioMedicamentosRepository) GetAll2() ([]models.HorarioMedicineDe
         JOIN medicines AS md ON hm.medicamento_id = md.id
         JOIN pacientes AS pc ON hm.paciente_id = pc.id
         JOIN users AS us ON pc.user_id = us.id
-        WHERE 
-      hm.deleted_at IS NULL
+        WHERE hm.deleted_at IS NULL
     `).Scan(&detalles).Error
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return detalles, nil
+	return detalles, int(count), nil
 }
 
 func (repo *horarioMedicamentosRepository) Update(horarioMedicamento models.HorarioMedicamento) (models.HorarioMedicamento, error) {
