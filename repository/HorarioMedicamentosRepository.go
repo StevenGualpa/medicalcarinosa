@@ -82,6 +82,8 @@ func (repo *horarioMedicamentosRepository) GetAll2() ([]models.HorarioMedicineDe
         JOIN medicines AS md ON hm.medicamento_id = md.id
         JOIN pacientes AS pc ON hm.paciente_id = pc.id
         JOIN users AS us ON pc.user_id = us.id
+        WHERE 
+      hm.deleted_at IS NULL
     `).Scan(&detalles).Error
 
 	if err != nil {
