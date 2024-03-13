@@ -12,6 +12,7 @@ type HorarioMedicamentosHandler interface {
 	Insert2(c *fiber.Ctx) error
 	GetAll(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
+	Delete2(c *fiber.Ctx) error
 }
 
 type horarioMedicamentosHandler struct {
@@ -87,5 +88,25 @@ func (h *horarioMedicamentosHandler) Delete(c *fiber.Ctx) error {
 	}
 
 	// Si la eliminación es exitosa, devuelve un mensaje de éxito
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Horario de medicamento eliminado con éxito"})
+}
+
+func (h *horarioMedicamentosHandler) Delete2(c *fiber.Ctx) error {
+	// Ejemplo de extracción de parámetros de la URL
+	pacienteID, err := strconv.Atoi(c.Params("pacienteID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID de paciente inválido"})
+	}
+
+	medicamentoID, err := strconv.Atoi(c.Params("medicamentoID"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID de medicamento inválido"})
+	}
+
+	err = h.repo.Delete2(uint(pacienteID), uint(medicamentoID))
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Error al eliminar el horario de medicamento"})
+	}
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Horario de medicamento eliminado con éxito"})
 }

@@ -17,6 +17,7 @@ type HorarioMedicamentosRepository interface {
 	Update(horarioMedicamento models.HorarioMedicamento) (models.HorarioMedicamento, error)
 	Delete(id uint) error
 	GetByID(id uint) (models.HorarioMedicamento, error)
+	Delete2(pacienteID, medicamentoID uint) error
 }
 
 type horarioMedicamentosRepository struct {
@@ -131,6 +132,14 @@ func (repo *horarioMedicamentosRepository) InsertFinal(pacienteID, medicamentoID
 			return err
 		}
 		horaActual = horario.HoraProxima
+	}
+	return nil
+}
+
+func (repo *horarioMedicamentosRepository) Delete2(pacienteID, medicamentoID uint) error {
+	result := repo.db.Where("paciente_id = ? AND medicamento_id = ?", pacienteID, medicamentoID).Delete(&models.HorarioMedicamento{})
+	if result.Error != nil {
+		return result.Error
 	}
 	return nil
 }
