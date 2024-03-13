@@ -58,7 +58,8 @@ func (r *agendaRepository) GetAll() ([]models.AgendaDetalle, error) {
 	  agendas AS ag
 	  INNER JOIN pacientes AS pa ON ag.paciente_id = pa.id
 	  INNER JOIN users AS us ON pa.user_id = us.id
-	 ag.deleted_at IS NULL
+	WHERE 
+	    ag.deleted_at IS NULL
     `
 
 	// Ejecutar la consulta
